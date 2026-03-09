@@ -6,13 +6,12 @@ export interface Event {
   time: string;
   venue: string;
   description: string;
-  registrationUrl: string;
+  registrationUrl?: string;
   status: EventStatus;
   imageUrl?: string;
 }
 
-export interface HistoricalEvent {
-  title: string;
+export interface HistoricalEvent extends Event {
   images: string[];
   testimonial: string;
   metricsCount: number;
@@ -24,13 +23,15 @@ export interface GlobalStats {
   districtsReached: number;
 }
 
-export interface ContributionDetails {
-  upiId: string;
-  bankAccount: string;
-  qrCodeUrl: string;
+export interface BankAccount {
+  accountName: string;
+  accountNumber: string;
+  ifscCode: string;
+  branch: string;
 }
 
-export interface DonationLink {
-  platform: string;
-  url: string;
+export interface ContributionDetails {
+  upiId: string;
+  bankAccount: BankAccount;
+  qrCodeUrl: string;
 }
