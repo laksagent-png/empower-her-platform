@@ -5,12 +5,10 @@ import {
   doc,
   getDoc,
   getDocs,
-  onSnapshot,
   query,
   type Firestore,
   type DocumentData,
   type QueryConstraint,
-  type Unsubscribe,
 } from "firebase/firestore";
 import { getStorage, ref, getDownloadURL, type FirebaseStorage } from "firebase/storage";
 import { getAuth, type Auth } from "firebase/auth";
@@ -79,67 +77,6 @@ export async function fetchCollection<T = DocumentData>(
 }
 
 /**
- * Subscribe to real-time updates for a Firestore collection.
- * Returns an unsubscribe function to stop listening.
- */
-export function subscribeToCollection<T = DocumentData>(
-  collectionPath: string,
-  callback: (data: T[]) => void,
-  onError?: (error: Error) => void,
-  ...constraints: QueryConstraint[]
-): Unsubscribe {
-  const ref = collection(db, collectionPath);
-  const q = constraints.length > 0 ? query(ref, ...constraints) : ref;
-  return onSnapshot(
-    q,
-    (snapshot) => {
-      const data = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as T));
-      callback(data);
-    },
-    (error) => {
-      if (onError) onError(error);
-    }
-  );
-}
-
-/**
- * Subscribe to real-time updates for a single Firestore document.
- * Returns an unsubscribe function to stop listening.
- */
-export function subscribeToDocument<T = DocumentData>(
-  collectionPath: string,
-  documentId: string,
-  callback: (data: T | null) => void,
-  onError?: (error: Error) => void
-): Unsubscribe {
-  const docRef = doc(db, collectionPath, documentId);
-  return onSnapshot(
-    docRef,
-    (snapshot) => {
-      if (!snapshot.exists()) {
-        callback(null);
-        return;
-      }
-      callback({ id: snapshot.id, ...snapshot.data() } as T);
-    },
-    (error) => {
-      if (onError) onError(error);
-    }
-  );
-}
-
-/**
- * Subscribe to real-time updates for the events collection.
- * Returns an unsubscribe function to stop listening.
- */
-export function getEventStream(
-  callback: (events: Event[]) => void,
-  onError?: (error: Error) => void
-): Unsubscribe {
-  return subscribeToCollection<Event>("events", callback, onError);
-}
-
-/**
  * Generate a public download URL for a file stored in Firebase Storage.
  */
 export async function getStorageUrl(path: string): Promise<string> {
@@ -167,13 +104,6 @@ export async function getGlobalStats(): Promise<GlobalStats | null> {
     }
     return null;
   }
-}
-
-/**
- * Cleanup helper that calls the provided Firestore unsubscribe function.
- */
-export function unsubscribeEvent(unsubscribe: Unsubscribe): void {
-  unsubscribe();
 }
 
 export default app;
