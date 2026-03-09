@@ -12,7 +12,9 @@ import {
   type QueryConstraint,
   type Unsubscribe,
 } from "firebase/firestore";
-import { getStorage, type FirebaseStorage } from "firebase/storage";
+import { getStorage, ref, getDownloadURL, type FirebaseStorage } from "firebase/storage";
+import { getAuth, type Auth } from "firebase/auth";
+import type { Event, GlobalStats } from "@/types/firebase";
 
 const requiredEnvVars: Record<string, string | undefined> = {
   VITE_FIREBASE_API_KEY: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -47,6 +49,7 @@ const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) 
 
 export const db: Firestore = getFirestore(app);
 export const storage: FirebaseStorage = getStorage(app);
+export const auth: Auth = getAuth(app);
 
 /**
  * Fetch a single document from Firestore.
@@ -123,6 +126,54 @@ export function subscribeToDocument<T = DocumentData>(
       if (onError) onError(error);
     }
   );
+}
+
+/**
+ * Subscribe to real-time updates for the events collection.
+ * Returns an unsubscribe function to stop listening.
+ */
+export function getEventStream(
+  callback: (events: Event[]) => void,
+  onError?: (error: Error) => void
+): Unsubscribe {
+  return subscribeToCollection<Event>("events", callback, onError);
+}
+
+/**
+ * Generate a public download URL for a file stored in Firebase Storage.
+ */
+export async function getStorageUrl(path: string): Promise<string> {
+  try {
+    const fileRef = ref(storage, path);
+    return await getDownloadURL(fileRef);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error(`Failed to get storage URL for path "${path}":`, error);
+    }
+    throw error;
+  }
+}
+
+/**
+ * Fetch the global statistics document from Firestore.
+ * Returns null if the document does not exist.
+ */
+export async function getGlobalStats(): Promise<GlobalStats | null> {
+  try {
+    return await fetchDocument<GlobalStats>("stats", "global");
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to fetch global stats:", error);
+    }
+    return null;
+  }
+}
+
+/**
+ * Cleanup helper that calls the provided Firestore unsubscribe function.
+ */
+export function unsubscribeEvent(unsubscribe: Unsubscribe): void {
+  unsubscribe();
 }
 
 export default app;
