@@ -138,7 +138,8 @@ interface Props {
 const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) => {
   const [form, setForm] = useState<FormData>(emptyForm);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [uploading, setUploading] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -175,23 +176,19 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
 
   // Image upload
   const handleImageUpload = async (file: File, target: "cover" | "gallery") => {
-    setUploading(true);
+    setUploadingCover(true);
     try {
       const url = await mockBlobStorage.uploadFile(file, `events/${file.name}`);
-      if (target === "cover") {
-        updateField("coverImageUrl", url);
-      } else {
-        updateField("images", [...(form.images ?? []), url]);
-      }
+      updateField("coverImageUrl", url);
     } catch {
       toast({ title: "Upload Failed", description: "Could not upload image.", variant: "destructive" });
     } finally {
-      setUploading(false);
+      setUploadingCover(false);
     }
   };
 
   const handleGalleryUpload = async (files: FileList) => {
-    setUploading(true);
+    setUploadingGallery(true);
     try {
       const urls: string[] = [];
       for (const file of Array.from(files)) {
@@ -202,7 +199,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
     } catch {
       toast({ title: "Upload Failed", description: "Could not upload one or more images.", variant: "destructive" });
     } finally {
-      setUploading(false);
+      setUploadingGallery(false);
     }
   };
 
@@ -344,11 +341,11 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={uploading}
+                disabled={uploadingCover || uploadingGallery}
                 onClick={() => coverInputRef.current?.click()}
               >
                 <Upload size={16} className="mr-1" />
-                {uploading ? "Uploading…" : "Upload Cover"}
+                {uploadingCover ? "Uploading…" : "Upload Cover"}
               </Button>
               {form.coverImageUrl && (
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border">
@@ -383,7 +380,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
               type="button"
               variant="outline"
               size="sm"
-              disabled={uploading}
+              disabled={uploadingCover || uploadingGallery}
               onClick={() => galleryInputRef.current?.click()}
             >
               <Upload size={16} className="mr-1" />
