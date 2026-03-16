@@ -341,11 +341,11 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={uploading}
+                disabled={uploadingCover || uploadingGallery}
                 onClick={() => coverInputRef.current?.click()}
               >
                 <Upload size={16} className="mr-1" />
-                {uploading ? "Uploading…" : "Upload Cover"}
+                {uploadingCover ? "Uploading…" : "Upload Cover"}
               </Button>
               {form.coverImageUrl && (
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border">
