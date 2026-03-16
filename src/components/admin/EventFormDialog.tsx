@@ -176,23 +176,19 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
 
   // Image upload
   const handleImageUpload = async (file: File, target: "cover" | "gallery") => {
-    setUploading(true);
+    setUploadingCover(true);
     try {
       const url = await mockBlobStorage.uploadFile(file, `events/${file.name}`);
-      if (target === "cover") {
-        updateField("coverImageUrl", url);
-      } else {
-        updateField("images", [...(form.images ?? []), url]);
-      }
+      updateField("coverImageUrl", url);
     } catch {
       toast({ title: "Upload Failed", description: "Could not upload image.", variant: "destructive" });
     } finally {
-      setUploading(false);
+      setUploadingCover(false);
     }
   };
 
   const handleGalleryUpload = async (files: FileList) => {
-    setUploading(true);
+    setUploadingGallery(true);
     try {
       const urls: string[] = [];
       for (const file of Array.from(files)) {
@@ -203,7 +199,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
     } catch {
       toast({ title: "Upload Failed", description: "Could not upload one or more images.", variant: "destructive" });
     } finally {
-      setUploading(false);
+      setUploadingGallery(false);
     }
   };
 
