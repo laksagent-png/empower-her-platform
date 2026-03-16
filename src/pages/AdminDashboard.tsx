@@ -1,17 +1,11 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEventStore, type EventData, type EventStatus, type EventType } from "@/stores/eventStore";
+import { useEventStore } from "@/stores/eventStore";
+import { EventStatus, type Event } from "@/types/firebase";
+import { format } from "date-fns";
+import EventFormDialog from "@/components/admin/EventFormDialog";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import {
   Table,
   TableHeader,
@@ -30,69 +24,58 @@ import {
 import { Plus, Pencil, Trash2, LogOut, Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
-type FormData = Omit<EventData, "id">;
+type FilterType = "all" | "upcoming" | "past";
 
-const emptyForm: FormData = {
-  title: "",
-  date: "",
-  time: "",
-  venue: "",
-  venueLink: "",
-  description: "",
-  status: "filling-fast",
-  formLink: "",
-  image: "",
-  type: "upcoming",
+const statusLabel: Record<EventStatus, string> = {
+  [EventStatus.FILLING_FAST]: "Filling Fast",
+  [EventStatus.ONLINE]: "Online",
+  [EventStatus.REGISTRATION_CLOSED]: "Registration Closed",
+  [EventStatus.COMPLETED]: "Completed",
 };
 
-const statusOptions: { value: EventStatus; label: string }[] = [
-  { value: "filling-fast", label: "Filling Fast" },
-  { value: "online", label: "Online" },
-  { value: "registration-closed", label: "Registration Closed" },
-];
+function isUpcoming(e: Event) {
+  return e.status !== EventStatus.COMPLETED;
+}
 
 const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const { events, addEvent, updateEvent, deleteEvent } = useEventStore();
+  const allEvents = useEventStore((s) => s.events);
+  const addEvent = useEventStore((s) => s.addEvent);
+  const updateEvent = useEventStore((s) => s.updateEvent);
+  const deleteEvent = useEventStore((s) => s.deleteEvent);
 
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [form, setForm] = useState<FormData>(emptyForm);
-  const [filterType, setFilterType] = useState<"all" | EventType>("all");
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [filterType, setFilterType] = useState<FilterType>("all");
 
-  const filteredEvents = filterType === "all" ? events : events.filter((e) => e.type === filterType);
+  const filteredEvents = useMemo(() => {
+    if (filterType === "all") return allEvents;
+    return allEvents.filter((e) => (filterType === "upcoming" ? isUpcoming(e) : !isUpcoming(e)));
+  }, [allEvents, filterType]);
 
   const openCreate = () => {
-    setEditingId(null);
-    setForm(emptyForm);
+    setEditingEvent(null);
     setDialogOpen(true);
   };
 
-  const openEdit = (event: EventData) => {
-    setEditingId(event.id);
-    const { id, ...rest } = event;
-    setForm(rest);
+  const openEdit = (event: Event) => {
+    setEditingEvent(event);
     setDialogOpen(true);
   };
 
-  const handleSave = () => {
-    if (!form.title.trim() || !form.date.trim()) {
-      toast({ title: "Validation Error", description: "Title and Date are required.", variant: "destructive" });
-      return;
-    }
-
+  const handleSave = (data: Omit<Event, "id" | "createdAt" | "updatedAt">, editingId: string | null) => {
     if (editingId) {
-      updateEvent(editingId, form);
-      toast({ title: "Event Updated", description: `"${form.title}" has been updated.` });
+      updateEvent(editingId, data);
+      toast({ title: "Event Updated", description: `"${data.title}" has been updated.` });
     } else {
-      addEvent(form);
-      toast({ title: "Event Created", description: `"${form.title}" has been added.` });
+      addEvent(data);
+      toast({ title: "Event Created", description: `"${data.title}" has been added.` });
     }
     setDialogOpen(false);
   };
 
-  const handleDelete = (event: EventData) => {
+  const handleDelete = (event: Event) => {
     if (window.confirm(`Delete "${event.title}"?`)) {
       deleteEvent(event.id);
       toast({ title: "Event Deleted", description: `"${event.title}" has been removed.` });
@@ -103,9 +86,6 @@ const AdminDashboard = () => {
     logout();
     navigate("/admin");
   };
-
-  const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) =>
-    setForm((prev) => ({ ...prev, [key]: value }));
 
   return (
     <div className="min-h-screen bg-background">
@@ -130,11 +110,9 @@ const AdminDashboard = () => {
       <main className="container py-8">
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-          <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground">
-            Event Management
-          </h1>
+          <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground">Event Management</h1>
           <div className="flex items-center gap-3">
-            <Select value={filterType} onValueChange={(v) => setFilterType(v as typeof filterType)}>
+            <Select value={filterType} onValueChange={(v) => setFilterType(v as FilterType)}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue />
               </SelectTrigger>
@@ -156,9 +134,8 @@ const AdminDashboard = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Title</TableHead>
-                <TableHead className="hidden md:table-cell">Date</TableHead>
+                <TableHead className="hidden md:table-cell">Start</TableHead>
                 <TableHead className="hidden lg:table-cell">Venue</TableHead>
-                <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -166,7 +143,7 @@ const AdminDashboard = () => {
             <TableBody>
               {filteredEvents.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                  <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
                     No events found. Create your first event!
                   </TableCell>
                 </TableRow>
@@ -175,33 +152,24 @@ const AdminDashboard = () => {
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">
-                      {event.date}
+                      {format(new Date(event.startDateTime), "dd MMM yyyy, h:mm a")}
                     </TableCell>
                     <TableCell className="hidden lg:table-cell text-muted-foreground">
-                      {event.venue || "—"}
+                      {event.venueName || "—"}
                     </TableCell>
                     <TableCell>
                       <span
                         className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          event.type === "upcoming"
-                            ? "bg-secondary/20 text-secondary"
-                            : "bg-muted text-muted-foreground"
-                        }`}
-                      >
-                        {event.type}
-                      </span>
-                    </TableCell>
-                    <TableCell>
-                      <span
-                        className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${
-                          event.status === "filling-fast"
+                          event.status === EventStatus.FILLING_FAST
                             ? "bg-accent/20 text-accent-foreground"
-                            : event.status === "online"
+                            : event.status === EventStatus.ONLINE
                             ? "bg-secondary/20 text-secondary"
+                            : event.status === EventStatus.COMPLETED
+                            ? "bg-primary/20 text-primary"
                             : "bg-muted text-muted-foreground"
                         }`}
                       >
-                        {statusOptions.find((s) => s.value === event.status)?.label}
+                        {statusLabel[event.status]}
                       </span>
                     </TableCell>
                     <TableCell className="text-right">
@@ -222,98 +190,13 @@ const AdminDashboard = () => {
         </div>
       </main>
 
-      {/* Create / Edit Dialog */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingId ? "Edit Event" : "Create Event"}</DialogTitle>
-            <DialogDescription>
-              {editingId ? "Update event details below." : "Fill in event details to publish."}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4 pt-2">
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Title *</label>
-              <Input value={form.title} onChange={(e) => updateField("title", e.target.value)} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Date *</label>
-                <Input
-                  value={form.date}
-                  onChange={(e) => updateField("date", e.target.value)}
-                  placeholder="15th April 2026"
-                />
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Time</label>
-                <Input
-                  value={form.time}
-                  onChange={(e) => updateField("time", e.target.value)}
-                  placeholder="10:00 AM – 4:00 PM"
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Venue</label>
-              <Input value={form.venue} onChange={(e) => updateField("venue", e.target.value)} />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Venue Map Link</label>
-              <Input value={form.venueLink} onChange={(e) => updateField("venueLink", e.target.value)} placeholder="https://maps.google.com/..." />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Description</label>
-              <Textarea value={form.description} onChange={(e) => updateField("description", e.target.value)} rows={3} />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Type</label>
-                <Select value={form.type} onValueChange={(v) => updateField("type", v as EventType)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="upcoming">Upcoming</SelectItem>
-                    <SelectItem value="past">Past</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1.5">
-                <label className="text-sm font-medium">Status</label>
-                <Select value={form.status} onValueChange={(v) => updateField("status", v as EventStatus)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {statusOptions.map((s) => (
-                      <SelectItem key={s.value} value={s.value}>{s.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Registration Form Link</label>
-              <Input value={form.formLink} onChange={(e) => updateField("formLink", e.target.value)} placeholder="https://forms.google.com/..." />
-            </div>
-
-            <div className="space-y-1.5">
-              <label className="text-sm font-medium">Cover Image URL</label>
-              <Input value={form.image} onChange={(e) => updateField("image", e.target.value)} placeholder="https://..." />
-            </div>
-
-            <div className="flex justify-end gap-3 pt-2">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
-              <Button onClick={handleSave} className="gradient-warm text-primary-foreground">
-                {editingId ? "Update" : "Create"}
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Form Dialog */}
+      <EventFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        editingEvent={editingEvent}
+        onSave={handleSave}
+      />
     </div>
   );
 };
