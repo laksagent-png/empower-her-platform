@@ -371,10 +371,11 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
               ref={galleryInputRef}
               type="file"
               accept="image/*"
+              multiple
               className="hidden"
               onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) handleImageUpload(file, "gallery");
+                const files = e.target.files;
+                if (files && files.length > 0) handleGalleryUpload(files);
                 e.target.value = "";
               }}
             />
