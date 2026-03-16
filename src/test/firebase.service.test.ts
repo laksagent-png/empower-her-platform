@@ -19,6 +19,7 @@ import {
   fetchUpcomingEvents,
   fetchPastEvents,
 } from "@/services/firebase";
+import { EventStatus } from "@/types/firebase";
 
 const mockFetchCollection = database.fetchCollection as ReturnType<typeof vi.fn>;
 
@@ -60,23 +61,14 @@ describe("fetchPastEvents", () => {
     mockFetchCollection.mockResolvedValue([]);
   });
 
-  it("queries by startDateTime < current time", async () => {
-    const before = Date.now();
+  it("queries by status == COMPLETED", async () => {
     await fetchPastEvents();
-    const after = Date.now();
 
     expect(mockFetchCollection).toHaveBeenCalledOnce();
     const [, filter] = mockFetchCollection.mock.calls[0];
-    expect(filter.field).toBe("startDateTime");
-    expect(filter.op).toBe("<");
-    expect(filter.value).toBeGreaterThanOrEqual(before);
-    expect(filter.value).toBeLessThanOrEqual(after);
-  });
-
-  it("does not filter by status", async () => {
-    await fetchPastEvents();
-    const [, filter] = mockFetchCollection.mock.calls[0];
-    expect(filter.field).not.toBe("status");
+    expect(filter.field).toBe("status");
+    expect(filter.op).toBe("==");
+    expect(filter.value).toBe(EventStatus.COMPLETED);
   });
 
   it("returns empty array on error", async () => {
