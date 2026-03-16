@@ -190,6 +190,22 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
     }
   };
 
+  const handleGalleryUpload = async (files: FileList) => {
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const url = await mockBlobStorage.uploadFile(file, `events/${file.name}`);
+        urls.push(url);
+      }
+      updateField("images", [...(form.images ?? []), ...urls]);
+    } catch {
+      toast({ title: "Upload Failed", description: "Could not upload one or more images.", variant: "destructive" });
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const removeGalleryImage = (idx: number) => {
     updateField("images", (form.images ?? []).filter((_, i) => i !== idx));
   };
