@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2 } from "lucide-react";
 import { useEventStore, type EventData } from "@/stores/eventStore";
@@ -21,7 +22,8 @@ const handleShare = (event: EventData) => {
 };
 
 const UpcomingEvents = () => {
-  const events = useEventStore((s) => s.events.filter((e) => e.type === "upcoming"));
+  const allEvents = useEventStore((s) => s.events);
+  const events = useMemo(() => allEvents.filter((e) => e.type === "upcoming"), [allEvents]);
 
   return (
     <section id="events" className="py-20 md:py-28 bg-background">

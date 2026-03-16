@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { useEventStore } from "@/stores/eventStore";
@@ -6,7 +6,8 @@ import { useEventStore } from "@/stores/eventStore";
 const INITIAL_VISIBLE = 4;
 
 const PastEvents = () => {
-  const pastEvents = useEventStore((s) => s.events.filter((e) => e.type === "past"));
+  const allEvents = useEventStore((s) => s.events);
+  const pastEvents = useMemo(() => allEvents.filter((e) => e.type === "past"), [allEvents]);
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [visibleCounts, setVisibleCounts] = useState<Record<string, number>>({});
 
