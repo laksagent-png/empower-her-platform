@@ -23,13 +23,17 @@ export interface Event {
   /** Hero / cover image URL. */
   coverImageUrl: string;
   /** Array of gallery image URLs. */
-  images: string[];
-  testimonials: Array<{
+  images?: string[];
+  testimonials?: Array<{
     description: string;
     username: string;
   }>;
   /** Dynamic per-event metrics, e.g. [{ label: "Women Trained", value: "150" }] */
-  metrics: Array<{ label: string; value: string }>;
+  metrics?: Array<{ label: string; value: string }>;
+  /** Name of the event host. */
+  hostName: string;
+  /** Contact number of the event host (optional). */
+  hostContact?: string;
   /** Unix epoch timestamp (milliseconds) when the record was created. */
   createdAt: number;
   /** Unix epoch timestamp (milliseconds) when the record was last updated. */

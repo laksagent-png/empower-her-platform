@@ -13,7 +13,7 @@ export const EventSchema = z
     registrationUrl: z.string().url(),
     status: z.nativeEnum(EventStatus),
     coverImageUrl: z.string().url(),
-    images: z.array(z.string().url()).min(1),
+    images: z.array(z.string().url()).min(1).optional(),
     testimonials: z
       .array(
         z.object({
@@ -21,7 +21,7 @@ export const EventSchema = z
           username: z.string().min(1).max(100),
         })
       )
-      .default([]),
+      .optional(),
     metrics: z
       .array(
         z.object({
@@ -29,7 +29,9 @@ export const EventSchema = z
           value: z.string().min(1).max(100),
         })
       )
-      .default([]),
+      .optional(),
+    hostName: z.string().min(1).max(100),
+    hostContact: z.string().optional(),
     createdAt: z.number().int(),
     updatedAt: z.number().int(),
   })
