@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Aagaj – Empowering Women Across India</title>
+    <script>
+      // Single Page Apps for GitHub Pages
+      // Redirects 404s back to index.html, encoding the path in the query string
+      // so that the SPA can restore the original URL client-side.
+      // See: https://github.com/rafgraph/spa-github-pages
+      // 1 = keep the repository-name segment (empower-her-platform) in the path,
+      // since this app is deployed to https://laksagent-png.github.io/empower-her-platform/
+      var pathSegmentsToKeep = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol +
+          "//" +
+          l.hostname +
+          (l.port ? ":" + l.port : "") +
+          l.pathname
+            .split("/")
+            .slice(0, 1 + pathSegmentsToKeep)
+            .join("/") +
+          "/?/" +
+          l.pathname
+            .slice(1)
+            .split("/")
+            .slice(pathSegmentsToKeep)
+            .join("/")
+            .replace(/&/g, "~and~") +
+          (l.search
+            ? "&" + l.search.slice(1).replace(/&/g, "~and~")
+            : "") +
+          l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>
