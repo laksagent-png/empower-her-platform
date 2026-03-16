@@ -1,23 +1,43 @@
-export type EventStatus = "Filling Fast" | "Registration Closed" | "Online";
-
-export interface Event {
-  title: string;
-  /** Unix epoch timestamp (milliseconds) representing the event date and time. */
-  date: number;
-  venue: string;
-  /** Optional Google Maps link for the venue. */
-  venueMapUrl?: string;
-  description: string;
-  registrationUrl?: string;
-  status: EventStatus;
-  coverImageUrl?: string;
+export enum EventStatus {
+  FILLING_FAST = "FILLING_FAST",
+  REGISTRATION_CLOSED = "REGISTRATION_CLOSED",
+  ONLINE = "ONLINE",
+  COMPLETED = "COMPLETED",
 }
 
-export interface HistoricalEvent extends Event {
-  images: string[];
-  testimonial: string;
-  /** Dynamic per-event metrics, e.g. [{ label: "Stationary kits distributed", value: "100" }] */
-  metrics: Array<{ label: string; value: string }>;
+export interface Event {
+  id: string;
+  title: string;
+  /** Unix epoch timestamp (milliseconds) for when the event starts. */
+  startDateTime: number;
+  /** Unix epoch timestamp (milliseconds) for when the event ends. */
+  endDateTime: number;
+  /** Location name, e.g. "Women's Resource Center, Bangalore". */
+  venueName: string;
+  /** Google Maps or location URL for the venue. */
+  venueUrl: string;
+  description: string;
+  /** Google Form or external registration URL. */
+  registrationUrl: string;
+  status: EventStatus;
+  /** Hero / cover image URL. */
+  coverImageUrl: string;
+  /** Array of gallery image URLs. */
+  images?: string[];
+  testimonials?: Array<{
+    description: string;
+    username: string;
+  }>;
+  /** Dynamic per-event metrics, e.g. [{ label: "Women Trained", value: "150" }] */
+  metrics?: Array<{ label: string; value: string }>;
+  /** Name of the event host. */
+  hostName: string;
+  /** Contact number of the event host (optional). */
+  hostContact?: string;
+  /** Unix epoch timestamp (milliseconds) when the record was created. */
+  createdAt: number;
+  /** Unix epoch timestamp (milliseconds) when the record was last updated. */
+  updatedAt: number;
 }
 
 export interface GlobalStats {
