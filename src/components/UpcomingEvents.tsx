@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2 } from "lucide-react";
 import { useEventStore, type EventData } from "@/stores/eventStore";
