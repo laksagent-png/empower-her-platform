@@ -380,7 +380,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
               type="button"
               variant="outline"
               size="sm"
-              disabled={uploading}
+              disabled={uploadingCover || uploadingGallery}
               onClick={() => galleryInputRef.current?.click()}
             >
               <Upload size={16} className="mr-1" />
