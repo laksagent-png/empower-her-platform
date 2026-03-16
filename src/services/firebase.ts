@@ -1,5 +1,4 @@
 import type { Event } from "@/types/firebase";
-import { EventStatus } from "@/types/firebase";
 import { database } from "./database";
 import { validateEvent } from "@/schemas/event.schema";
 
@@ -39,14 +38,16 @@ export async function fetchEvent(id: string): Promise<Event | null> {
 }
 
 /**
- * Fetch only upcoming (non-completed) events from Firestore.
+ * Fetch only upcoming events from Firestore.
+ * An event is considered upcoming if its start date/time is in the future.
  */
 export async function fetchUpcomingEvents(): Promise<Event[]> {
+  const now = Date.now();
   try {
     return await database.fetchCollection<Event>(EVENTS_COLLECTION, {
-      field: "status",
-      op: "!=",
-      value: EventStatus.COMPLETED,
+      field: "startDateTime",
+      op: ">=",
+      value: now,
     });
   } catch (error) {
     if (import.meta.env.DEV) {
@@ -57,14 +58,16 @@ export async function fetchUpcomingEvents(): Promise<Event[]> {
 }
 
 /**
- * Fetch only completed (past) events from Firestore.
+ * Fetch only past events from Firestore.
+ * An event is considered past if its start date/time is in the past.
  */
 export async function fetchPastEvents(): Promise<Event[]> {
+  const now = Date.now();
   try {
     return await database.fetchCollection<Event>(EVENTS_COLLECTION, {
-      field: "status",
-      op: "==",
-      value: EventStatus.COMPLETED,
+      field: "startDateTime",
+      op: "<",
+      value: now,
     });
   } catch (error) {
     if (import.meta.env.DEV) {
