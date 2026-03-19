@@ -13,10 +13,12 @@ const statusConfig: Record<EventStatus, { label: string; className: string } | u
   [EventStatus.COMPLETED]: undefined,
 };
 
-const handleShare = (event: Event) => {
+const handleShare = (e: React.MouseEvent, event: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
   const dateStr = format(new Date(event.startDateTime), "dd MMM yyyy");
+  const url = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, "")}/events/${event.id}`;
   const text = `Join me at "${event.title}" by Aagaj on ${dateStr}! Register here:`;
-  if (navigator.share) {
     navigator.share({ title: event.title, text, url: window.location.href });
   } else {
     window.open(
