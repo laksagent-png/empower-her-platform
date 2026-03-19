@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2 } from "lucide-react";
 import { format } from "date-fns";
