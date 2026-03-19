@@ -77,7 +77,9 @@ const UpcomingEvents = () => {
                     </div>
                   )}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-heading text-xl font-bold text-foreground mb-2">{event.title}</h3>
+                    <Link to={`/events/${event.id}`} className="font-heading text-xl font-bold text-foreground mb-2 hover:text-primary transition-colors">
+                      <h3>{event.title}</h3>
+                    </Link>
                     <div className="space-y-1.5 mb-3 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} /> {format(new Date(event.startDateTime), "dd MMM yyyy")}
