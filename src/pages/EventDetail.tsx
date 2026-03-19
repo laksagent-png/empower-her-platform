@@ -2,22 +2,17 @@ import { useMemo, useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Calendar,
-  Clock,
-  MapPin,
-  ExternalLink,
-  Share2,
-  ArrowLeft,
-  Quote,
-  X,
-  ChevronLeft,
-  ChevronRight,
+  Calendar, Clock, MapPin, ExternalLink, Share2,
+  ArrowLeft, Quote, X, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useEventStore } from "@/stores/eventStore";
 import { EventStatus, type Event } from "@/types/firebase";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+const GALLERY_INITIAL = 4;
+const GALLERY_PAGE = 8;
 
 const statusConfig: Record<EventStatus, { label: string; className: string } | undefined> = {
   [EventStatus.FILLING_FAST]: { label: "Filling Fast", className: "bg-accent text-accent-foreground" },
@@ -43,6 +38,7 @@ const EventDetail = () => {
   const event = useMemo(() => allEvents.find((e) => e.id === id), [allEvents, id]);
 
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
+  const [galleryVisible, setGalleryVisible] = useState(GALLERY_INITIAL);
   const closeLightbox = () => setLightbox(null);
   const navigateLightbox = useCallback(
     (dir: 1 | -1) => {
@@ -73,6 +69,9 @@ const EventDetail = () => {
   const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
   const isCompleted = event.status === EventStatus.COMPLETED;
   const gallery = event.images ?? [];
+  const shownGallery = gallery.slice(0, galleryVisible);
+  const hasMorePhotos = galleryVisible < gallery.length;
+  const backHash = isCompleted ? "/#past-events" : "/#events";
 
   return (
     <div className="min-h-screen bg-background">
@@ -95,7 +94,7 @@ const EventDetail = () => {
       </div>
 
       <div className="container py-10 md:py-16">
-        <Link to="/" className="inline-flex items-center gap-2 text-primary font-semibold hover:underline mb-8">
+        <Link to={backHash} className="inline-flex items-center gap-2 text-primary font-semibold hover:underline mb-8">
           <ArrowLeft size={18} /> Back to Home
         </Link>
 
@@ -145,7 +144,7 @@ const EventDetail = () => {
               <div>
                 <h2 className="font-heading text-xl font-bold text-foreground mb-4">Gallery</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-                  {gallery.map((img, idx) => (
+                  {shownGallery.map((img, idx) => (
                     <button
                       key={idx}
                       onClick={() => setLightbox({ images: gallery, index: idx })}
@@ -155,6 +154,16 @@ const EventDetail = () => {
                     </button>
                   ))}
                 </div>
+                {hasMorePhotos && (
+                  <div className="text-center mt-4">
+                    <button
+                      onClick={() => setGalleryVisible((c) => c + GALLERY_PAGE)}
+                      className="px-6 py-3 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-primary-foreground transition-colors min-h-[48px]"
+                    >
+                      Load More Photos
+                    </button>
+                  </div>
+                )}
               </div>
             )}
           </div>
