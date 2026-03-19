@@ -1,10 +1,12 @@
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2 } from "lucide-react";
 import { format } from "date-fns";
 import { useEventStore } from "@/stores/eventStore";
 import { EventStatus, type Event } from "@/types/firebase";
+
+const PAGE_SIZE = 10;
 
 const statusConfig: Record<EventStatus, { label: string; className: string } | undefined> = {
   [EventStatus.FILLING_FAST]: { label: "Filling Fast", className: "bg-accent text-accent-foreground" },
@@ -32,6 +34,10 @@ const UpcomingEvents = () => {
     () => allEvents.filter((e) => e.status !== EventStatus.COMPLETED),
     [allEvents]
   );
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const shownEvents = events.slice(0, visibleCount);
+  const hasMore = visibleCount < events.length;
+  const navigate = useNavigate();
 
   return (
     <section id="events" className="py-20 md:py-28 bg-background">
@@ -53,79 +59,95 @@ const UpcomingEvents = () => {
         {events.length === 0 ? (
           <p className="text-center text-muted-foreground">No upcoming events at the moment. Check back soon!</p>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {events.map((event, i) => {
-              const status = statusConfig[event.status];
-              const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
-              return (
-                <motion.div
-                  key={event.id}
-                  initial={{ opacity: 0, y: 30 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: i * 0.15 }}
-                  className="bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col"
-                >
-                  {event.coverImageUrl && (
-                    <div className="relative">
-                      <img src={event.coverImageUrl} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
-                      {status && (
-                        <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}>
-                          {status.label}
-                        </span>
-                      )}
-                    </div>
-                  )}
-                  <div className="p-5 flex flex-col flex-1">
-                    <Link to={`/events/${event.id}`} className="font-heading text-xl font-bold text-foreground mb-2 hover:text-primary transition-colors">
-                      <h3>{event.title}</h3>
-                    </Link>
-                    <div className="space-y-1.5 mb-3 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-2">
-                        <Calendar size={14} /> {format(new Date(event.startDateTime), "dd MMM yyyy")}
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {shownEvents.map((event, i) => {
+                const status = statusConfig[event.status];
+                const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
+                return (
+                  <motion.div
+                    key={event.id}
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: i * 0.15 }}
+                    className="bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col cursor-pointer"
+                    onClick={() => navigate(`/events/${event.id}`)}
+                  >
+                    {event.coverImageUrl && (
+                      <div className="relative">
+                        <img src={event.coverImageUrl} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
+                        {status && (
+                          <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}>
+                            {status.label}
+                          </span>
+                        )}
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Clock size={14} />
-                        {format(new Date(event.startDateTime), "h:mm a")} – {format(new Date(event.endDateTime), "h:mm a")}
-                      </div>
-                      {event.venueName && (
+                    )}
+                    <div className="p-5 flex flex-col flex-1">
+                      <h3 className="font-heading text-xl font-bold text-foreground mb-2 hover:text-primary transition-colors">
+                        {event.title}
+                      </h3>
+                      <div className="space-y-1.5 mb-3 text-sm text-muted-foreground">
                         <div className="flex items-center gap-2">
-                          <MapPin size={14} />
-                          <a href={event.venueUrl} target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">
-                            {event.venueName}
-                          </a>
+                          <Calendar size={14} /> {format(new Date(event.startDateTime), "dd MMM yyyy")}
                         </div>
-                      )}
+                        <div className="flex items-center gap-2">
+                          <Clock size={14} />
+                          {format(new Date(event.startDateTime), "h:mm a")} – {format(new Date(event.endDateTime), "h:mm a")}
+                        </div>
+                        {event.venueName && (
+                          <div className="flex items-center gap-2">
+                            <MapPin size={14} />
+                            <span
+                              onClick={(e) => { e.stopPropagation(); window.open(event.venueUrl, "_blank"); }}
+                              className="underline hover:text-primary transition-colors cursor-pointer"
+                            >
+                              {event.venueName}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      <p className="text-sm text-muted-foreground mb-5 flex-1">{event.description}</p>
+                      <div className="flex gap-3 mt-auto">
+                        <a
+                          href={isClosed ? undefined : event.registrationUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold min-h-[48px] transition-opacity ${
+                            isClosed
+                              ? "bg-muted text-muted-foreground cursor-not-allowed"
+                              : "gradient-warm text-primary-foreground hover:opacity-90"
+                          }`}
+                          onClick={(e) => { e.stopPropagation(); if (isClosed) e.preventDefault(); }}
+                        >
+                          <ExternalLink size={16} />
+                          {isClosed ? "Closed" : "Register"}
+                        </a>
+                        <button
+                          onClick={(ev) => handleShare(ev, event)}
+                          className="p-3 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors min-h-[48px]"
+                          aria-label="Share event"
+                        >
+                          <Share2 size={18} />
+                        </button>
+                      </div>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-5 flex-1">{event.description}</p>
-                    <div className="flex gap-3 mt-auto">
-                      <a
-                        href={isClosed ? undefined : event.registrationUrl}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold min-h-[48px] transition-opacity ${
-                          isClosed
-                            ? "bg-muted text-muted-foreground cursor-not-allowed"
-                            : "gradient-warm text-primary-foreground hover:opacity-90"
-                        }`}
-                        onClick={(e) => isClosed && e.preventDefault()}
-                      >
-                        <ExternalLink size={16} />
-                        {isClosed ? "Closed" : "Register"}
-                      </a>
-                      <button
-                        onClick={(ev) => handleShare(ev, event)}
-                        className="p-3 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors min-h-[48px]"
-                        aria-label="Share event"
-                      >
-                        <Share2 size={18} />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              );
-            })}
-          </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+            {hasMore && (
+              <div className="text-center mt-10">
+                <button
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                  className="px-8 py-3 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-primary-foreground transition-colors min-h-[48px]"
+                >
+                  Load More Events
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
