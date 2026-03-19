@@ -22,6 +22,7 @@ const App = () => (
         <BrowserRouter basename={import.meta.env.BASE_URL.replace(/\/$/, "")}>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/events/:id" element={<EventDetail />} />
             <Route path="/admin" element={<AdminLogin />} />
             <Route
               path="/admin/dashboard"
