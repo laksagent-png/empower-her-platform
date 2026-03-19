@@ -19,12 +19,10 @@ const handleShare = (e: React.MouseEvent, event: Event) => {
   const dateStr = format(new Date(event.startDateTime), "dd MMM yyyy");
   const url = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, "")}/events/${event.id}`;
   const text = `Join me at "${event.title}" by Aagaj on ${dateStr}! Register here:`;
-    navigator.share({ title: event.title, text, url: window.location.href });
+  if (navigator.share) {
+    navigator.share({ title: event.title, text, url });
   } else {
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(text + " " + window.location.href)}`,
-      "_blank"
-    );
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, "_blank");
   }
 };
 
