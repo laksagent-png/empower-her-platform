@@ -114,7 +114,7 @@ const UpcomingEvents = () => {
                         {isClosed ? "Closed" : "Register"}
                       </a>
                       <button
-                        onClick={() => handleShare(event)}
+                        onClick={(ev) => handleShare(ev, event)}
                         className="p-3 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors min-h-[48px]"
                         aria-label="Share event"
                       >
