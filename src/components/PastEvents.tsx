@@ -1,4 +1,5 @@
 import { useState, useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, ChevronLeft, ChevronRight, Quote } from "lucide-react";
 import { format } from "date-fns";
@@ -66,7 +67,9 @@ const PastEvents = () => {
                       <p className="text-accent text-sm font-semibold mb-1">
                         {format(new Date(event.startDateTime), "MMMM yyyy")}
                       </p>
-                      <h3 className="font-heading text-2xl md:text-3xl font-bold text-primary-foreground">{event.title}</h3>
+                      <Link to={`/events/${event.id}`} className="hover:underline">
+                        <h3 className="font-heading text-2xl md:text-3xl font-bold text-primary-foreground">{event.title}</h3>
+                      </Link>
                     </div>
                   </div>
 

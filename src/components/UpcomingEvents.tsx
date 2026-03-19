@@ -1,4 +1,5 @@
 import { useMemo } from "react";
+import { Link } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2 } from "lucide-react";
 import { format } from "date-fns";
@@ -12,16 +13,16 @@ const statusConfig: Record<EventStatus, { label: string; className: string } | u
   [EventStatus.COMPLETED]: undefined,
 };
 
-const handleShare = (event: Event) => {
+const handleShare = (e: React.MouseEvent, event: Event) => {
+  e.preventDefault();
+  e.stopPropagation();
   const dateStr = format(new Date(event.startDateTime), "dd MMM yyyy");
+  const url = `${window.location.origin}${import.meta.env.BASE_URL.replace(/\/$/, "")}/events/${event.id}`;
   const text = `Join me at "${event.title}" by Aagaj on ${dateStr}! Register here:`;
   if (navigator.share) {
-    navigator.share({ title: event.title, text, url: window.location.href });
+    navigator.share({ title: event.title, text, url });
   } else {
-    window.open(
-      `https://wa.me/?text=${encodeURIComponent(text + " " + window.location.href)}`,
-      "_blank"
-    );
+    window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, "_blank");
   }
 };
 
@@ -76,7 +77,9 @@ const UpcomingEvents = () => {
                     </div>
                   )}
                   <div className="p-5 flex flex-col flex-1">
-                    <h3 className="font-heading text-xl font-bold text-foreground mb-2">{event.title}</h3>
+                    <Link to={`/events/${event.id}`} className="font-heading text-xl font-bold text-foreground mb-2 hover:text-primary transition-colors">
+                      <h3>{event.title}</h3>
+                    </Link>
                     <div className="space-y-1.5 mb-3 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Calendar size={14} /> {format(new Date(event.startDateTime), "dd MMM yyyy")}
@@ -111,7 +114,7 @@ const UpcomingEvents = () => {
                         {isClosed ? "Closed" : "Register"}
                       </a>
                       <button
-                        onClick={() => handleShare(event)}
+                        onClick={(ev) => handleShare(ev, event)}
                         className="p-3 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors min-h-[48px]"
                         aria-label="Share event"
                       >
