@@ -53,4 +53,4 @@ The changes generally revolve around updating the build tooling, integrating Fir
 - Various event images updated (`event-digital.jpg`, `event-entrepreneur.jpg`, `event-finance.jpg`, `event-health.jpg`, `event-selfdefense.jpg`, `hero-women.jpg`).
 
 ---
-*Generated automatically by Trae based on `git diff`.*
+
