@@ -218,7 +218,7 @@ describe("fetchContributionDetails", () => {
   });
 
   it("fetches from settings/contribution", async () => {
-    const doc = { upiId: "test@upi", qrCodeUrl: "", bankAccount: { accountName: "Test", accountNumber: "123", ifscCode: "SBIN", branch: "Main" }, updatedAt: 12345 };
+    const doc = { upiId: "test@upi", bankAccount: { accountName: "Test", accountNumber: "123", ifscCode: "SBIN", branch: "Main" }, updatedAt: 12345 };
     mockFetchDocument.mockResolvedValue(doc);
     const result = await fetchContributionDetails();
     expect(mockFetchDocument).toHaveBeenCalledOnce();
@@ -245,7 +245,6 @@ describe("updateContributionDetails", () => {
     const before = Date.now();
     const doc = {
       upiId: "test@upi",
-      qrCodeUrl: "",
       bankAccount: {
         accountName: "Test",
         accountNumber: "123",

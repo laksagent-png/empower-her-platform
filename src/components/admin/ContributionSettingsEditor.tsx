@@ -8,7 +8,6 @@ import { toast } from "@/hooks/use-toast";
 
 const DEFAULT_DOC: Omit<ContributionDoc, "updatedAt"> = {
   upiId: "aagaj@upi",
-  qrCodeUrl: undefined,
   bankAccount: {
     accountName: "Aagaj Foundation",
     accountNumber: "1234567890123456",
@@ -32,7 +31,6 @@ const ContributionSettingsEditor = () => {
     if (serverDoc) {
       setForm({
         upiId: serverDoc.upiId ?? DEFAULT_DOC.upiId,
-        qrCodeUrl: serverDoc.qrCodeUrl ?? "",
         bankAccount: {
           accountName: serverDoc.bankAccount?.accountName ?? DEFAULT_DOC.bankAccount.accountName,
           accountNumber: serverDoc.bankAccount?.accountNumber ?? DEFAULT_DOC.bankAccount.accountNumber,
@@ -60,10 +58,6 @@ const ContributionSettingsEditor = () => {
       });
     },
   });
-
-  const setField = (field: keyof Omit<ContributionDoc, "updatedAt" | "bankAccount">, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value === "" ? undefined : value }));
-  };
 
   const setBankField = (
     field: keyof ContributionDoc["bankAccount"],
@@ -99,25 +93,8 @@ const ContributionSettingsEditor = () => {
           <Input
             value={form.upiId}
             placeholder="e.g. aagaj@upi"
-            onChange={(e) => setField("upiId", e.target.value)}
+            onChange={(e) => setForm((prev) => ({ ...prev, upiId: e.target.value }))}
           />
-        </div>
-        <div className="space-y-1">
-          <label className="text-xs font-medium text-muted-foreground">
-            QR Code Image URL (optional)
-          </label>
-          <Input
-            value={form.qrCodeUrl ?? ""}
-            placeholder="https://example.com/qr.png"
-            onChange={(e) => setField("qrCodeUrl", e.target.value)}
-          />
-          {form.qrCodeUrl && (
-            <img
-              src={form.qrCodeUrl}
-              alt="QR Code Preview"
-              className="mt-2 w-24 h-24 object-contain rounded border border-border"
-            />
-          )}
         </div>
       </div>
 

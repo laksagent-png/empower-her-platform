@@ -9,7 +9,6 @@ export const BankAccountSchema = z.object({
 
 export const ContributionDocSchema = z.object({
   upiId: z.string().min(1, "UPI ID is required").max(100),
-  qrCodeUrl: z.string().url("Must be a valid URL").optional(),
   bankAccount: BankAccountSchema,
   updatedAt: z.number().int(),
   updatedBy: z.string().optional(),
