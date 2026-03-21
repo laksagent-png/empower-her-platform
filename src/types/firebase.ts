@@ -5,6 +5,17 @@ export enum EventStatus {
   COMPLETED = "COMPLETED",
 }
 
+/**
+ * A stored image asset with a public download URL and the Firebase Storage
+ * object path needed for deletion.
+ */
+export interface ImageAsset {
+  /** Public Firebase Storage download URL. */
+  url: string;
+  /** Firebase Storage object path, e.g. "events/tmp/{sessionId}/cover/...". */
+  path: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -20,10 +31,10 @@ export interface Event {
   /** Google Form or external registration URL. */
   registrationUrl: string;
   status: EventStatus;
-  /** Hero / cover image URL. */
-  coverImageUrl: string;
-  /** Array of gallery image URLs. */
-  images?: string[];
+  /** Cover image asset with public URL and Firebase Storage path for deletion. */
+  coverImage: ImageAsset;
+  /** Gallery image assets with public URLs and Firebase Storage paths for deletion. */
+  imageAssets?: ImageAsset[];
   testimonials?: Array<{
     description: string;
     username: string;

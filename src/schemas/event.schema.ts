@@ -1,6 +1,11 @@
 import { z } from "zod";
 import { EventStatus } from "@/types/firebase";
 
+const imageAssetSchema = z.object({
+  url: z.string().url(),
+  path: z.string(),
+});
+
 export const EventSchema = z
   .object({
     id: z.string().min(1),
@@ -12,8 +17,8 @@ export const EventSchema = z
     description: z.string().min(10).max(500),
     registrationUrl: z.string().url(),
     status: z.nativeEnum(EventStatus),
-    coverImageUrl: z.string().url(),
-    images: z.array(z.string().url()).min(1).optional(),
+    coverImage: imageAssetSchema,
+    imageAssets: z.array(imageAssetSchema).optional(),
     testimonials: z
       .array(
         z.object({

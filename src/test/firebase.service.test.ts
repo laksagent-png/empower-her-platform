@@ -104,7 +104,7 @@ describe("createEvent", () => {
       description: "A test event",
       registrationUrl: "https://forms.example.com",
       status: EventStatus.ONLINE,
-      coverImageUrl: "https://example.com/cover.jpg",
+      coverImage: { url: "https://example.com/cover.jpg", path: "events/tmp/session123/cover/cover.jpg" },
       hostName: "Test Host",
     };
     const id = await createEvent(data);

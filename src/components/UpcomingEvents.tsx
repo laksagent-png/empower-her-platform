@@ -124,9 +124,9 @@ const UpcomingEvents = () => {
                       className="min-w-[300px] max-w-[340px] shrink-0 bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col cursor-pointer"
                       onClick={() => navigate(`/events/${event.id}`)}
                     >
-                      {event.coverImageUrl && (
+                      {event.coverImage && (
                         <div className="relative">
-                          <img src={event.coverImageUrl} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
+                          <img src={event.coverImage.url} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
                           {status && (
                             <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}>
                               {status.label}

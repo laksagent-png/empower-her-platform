@@ -36,7 +36,7 @@ const PastEvents = () => {
           <>
             <div className="space-y-16">
               {shownEvents.map((event) => {
-                const gallery = event.images ?? [];
+                const gallery = event.imageAssets ?? [];
                 return (
                   <motion.div
                     key={event.id}
@@ -46,7 +46,7 @@ const PastEvents = () => {
                     className="bg-background rounded-2xl overflow-hidden shadow-card"
                   >
                     <div className="relative h-64 md:h-80">
-                      <img src={event.coverImageUrl} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
+                      <img src={event.coverImage.url} alt={event.title} className="w-full h-full object-cover" loading="lazy" />
                       <div className="absolute inset-0 bg-foreground/40" />
                       <div className="absolute bottom-6 left-6 right-6">
                         <p className="text-accent text-sm font-semibold mb-1">

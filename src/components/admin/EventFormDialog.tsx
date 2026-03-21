@@ -2,8 +2,8 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 import { CalendarIcon, Upload, X, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
-import { EventStatus, type Event } from "@/types/firebase";
-import { mockBlobStorage } from "@/services/mock-blob-storage";
+import { EventStatus, type Event, type ImageAsset } from "@/types/firebase";
+import { firebaseBlobStorage } from "@/services/providers/firebase/blob-storage";
 import { cn } from "@/lib/utils";
 
 import { Button } from "@/components/ui/button";
@@ -31,7 +31,9 @@ import {
 } from "@/components/ui/popover";
 import { toast } from "@/hooks/use-toast";
 
-// ---------- Zod form schema (matches event.schema.ts but without id/createdAt/updatedAt) ----------
+// ---------- Zod form schema ----------
+
+const imageAssetSchema = z.object({ url: z.string().url(), path: z.string() });
 
 const formSchema = z
   .object({
@@ -43,8 +45,8 @@ const formSchema = z
     description: z.string().min(10, "Description must be at least 10 characters").max(500),
     registrationUrl: z.string().url("Must be a valid URL").or(z.literal("")),
     status: z.nativeEnum(EventStatus),
-    coverImageUrl: z.string().min(1, "Cover image is required"),
-    images: z.array(z.string()).optional(),
+    coverImage: imageAssetSchema.nullable().refine((v) => v !== null, "Cover image is required"),
+    imageAssets: z.array(imageAssetSchema).optional(),
     testimonials: z
       .array(z.object({ description: z.string().min(1), username: z.string().min(1) }))
       .optional(),
@@ -77,14 +79,15 @@ const emptyForm: FormData = {
   description: "",
   registrationUrl: "",
   status: EventStatus.FILLING_FAST,
-  coverImageUrl: "",
-  images: [],
+  coverImage: null,
+  imageAssets: [],
   testimonials: [],
   metrics: [],
   hostName: "",
   hostContact: "",
 };
 
+/** Map an event into the flat form state used by this dialog. */
 function eventToForm(event: Event): FormData {
   return {
     title: event.title,
@@ -95,8 +98,8 @@ function eventToForm(event: Event): FormData {
     description: event.description,
     registrationUrl: event.registrationUrl,
     status: event.status,
-    coverImageUrl: event.coverImageUrl,
-    images: event.images ?? [],
+    coverImage: event.coverImage,
+    imageAssets: event.imageAssets ?? [],
     testimonials: event.testimonials ?? [],
     metrics: event.metrics ?? [],
     hostName: event.hostName,
@@ -104,7 +107,23 @@ function eventToForm(event: Event): FormData {
   };
 }
 
-// ---------- Helper: millis ↔ date+time strings ----------
+/** Sanitise a filename: replace whitespace and non-safe chars. */
+function sanitizeFilename(name: string): string {
+  return name.replace(/\s+/g, "-").replace(/[^a-zA-Z0-9._-]/g, "");
+}
+
+/** Build a unique storage path for an upload. */
+function buildStoragePath(
+  sessionId: string,
+  slot: "cover" | "gallery",
+  filename: string
+): string {
+  const safe = sanitizeFilename(filename);
+  const rand = Math.random().toString(36).slice(2, 8);
+  return `events/tmp/${sessionId}/${slot}/${Date.now()}-${rand}-${safe}`;
+}
+
+// ---------- Millis ↔ date/time helpers ----------
 
 function millisToDate(ms: number): Date | undefined {
   return ms > 0 ? new Date(ms) : undefined;
@@ -130,7 +149,7 @@ interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   editingEvent: Event | null;
-  onSave: (data: FormData, editingId: string | null) => void;
+  onSave: (data: Omit<Event, "id" | "createdAt" | "updatedAt">, editingId: string | null) => void;
 }
 
 // ---------- Component ----------
@@ -140,6 +159,17 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [uploadingCover, setUploadingCover] = useState(false);
   const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  /**
+   * Paths uploaded during the current dialog session (reset on open).
+   * Used to clean up orphan Storage objects when the dialog is closed without saving.
+   */
+  const [sessionUploadedPaths, setSessionUploadedPaths] = useState<string[]>([]);
+
+  /** Stable UUID for this upload session; regenerated each time the dialog opens. */
+  const [uploadSessionId, setUploadSessionId] = useState(() => crypto.randomUUID());
+
   const coverInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
@@ -149,19 +179,39 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   const endDate = millisToDate(form.endDateTime);
   const endTime = millisToTimeStr(form.endDateTime);
 
-  // Sync form when editingEvent changes or dialog opens
+  // Sync form and reset session state when dialog opens
   useEffect(() => {
     if (open) {
+      setUploadSessionId(crypto.randomUUID());
+      setSessionUploadedPaths([]);
       setForm(editingEvent ? eventToForm(editingEvent) : emptyForm);
       setErrors({});
     }
   }, [open, editingEvent]);
 
+  /**
+   * Best-effort cleanup of orphaned uploads when the dialog is closed without saving.
+   * Paths that are still referenced in the current form state are skipped.
+   */
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
+      if (!isOpen && sessionUploadedPaths.length > 0) {
+        const savedPaths = new Set([
+          form.coverImage?.path ?? "",
+          ...((form.imageAssets ?? []).map((a) => a.path)),
+        ]);
+        const toDelete = sessionUploadedPaths.filter(
+          (p) => p && !savedPaths.has(p)
+        );
+        for (const path of toDelete) {
+          firebaseBlobStorage.deleteFile(path).catch(() => {
+            // best-effort; ignore errors during orphan cleanup
+          });
+        }
+      }
       onOpenChange(isOpen);
     },
-    [onOpenChange]
+    [onOpenChange, sessionUploadedPaths, form.coverImage, form.imageAssets]
   );
 
   const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) =>
@@ -177,14 +227,18 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   const setEndTime = (t: string) =>
     updateField("endDateTime", combineDateAndTime(endDate, t));
 
-  // Image upload
-  const handleImageUpload = async (file: File, target: "cover" | "gallery") => {
+  // ---------- Upload handlers ----------
+
+  const handleCoverUpload = async (file: File) => {
     setUploadingCover(true);
     try {
-      const url = await mockBlobStorage.uploadFile(file, `events/${file.name}`);
-      updateField("coverImageUrl", url);
-    } catch {
-      toast({ title: "Upload Failed", description: "Could not upload image.", variant: "destructive" });
+      const storagePath = buildStoragePath(uploadSessionId, "cover", file.name);
+      const asset = await firebaseBlobStorage.uploadFile(file, storagePath);
+      setSessionUploadedPaths((prev) => [...prev, asset.path]);
+      setForm((prev) => ({ ...prev, coverImage: asset }));
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("Cover upload failed:", err);
+      toast({ title: "Upload Failed", description: "Could not upload cover image.", variant: "destructive" });
     } finally {
       setUploadingCover(false);
     }
@@ -193,24 +247,79 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   const handleGalleryUpload = async (files: FileList) => {
     setUploadingGallery(true);
     try {
-      const urls: string[] = [];
+      const newAssets: ImageAsset[] = [];
       for (const file of Array.from(files)) {
-        const url = await mockBlobStorage.uploadFile(file, `events/${file.name}`);
-        urls.push(url);
+        const storagePath = buildStoragePath(uploadSessionId, "gallery", file.name);
+        const asset = await firebaseBlobStorage.uploadFile(file, storagePath);
+        setSessionUploadedPaths((prev) => [...prev, asset.path]);
+        newAssets.push(asset);
       }
-      updateField("images", [...(form.images ?? []), ...urls]);
-    } catch {
+      setForm((prev) => ({
+        ...prev,
+        imageAssets: [...(prev.imageAssets ?? []), ...newAssets],
+      }));
+    } catch (err) {
+      if (import.meta.env.DEV) console.error("Gallery upload failed:", err);
       toast({ title: "Upload Failed", description: "Could not upload one or more images.", variant: "destructive" });
     } finally {
       setUploadingGallery(false);
     }
   };
 
-  const removeGalleryImage = (idx: number) => {
-    updateField("images", (form.images ?? []).filter((_, i) => i !== idx));
+  // ---------- Remove / delete handlers ----------
+
+  const removeCoverImage = async () => {
+    const path = form.coverImage?.path;
+    if (path) {
+      setIsDeleting(true);
+      try {
+        await firebaseBlobStorage.deleteFile(path);
+        // Remove from session-tracking (no longer an orphan to clean up)
+        setSessionUploadedPaths((prev) => prev.filter((p) => p !== path));
+      } catch (err) {
+        if (import.meta.env.DEV) console.error("Cover image deletion failed:", err);
+        toast({
+          title: "Deletion Failed",
+          description: "Could not remove the cover image from storage. Please try again.",
+          variant: "destructive",
+        });
+        setIsDeleting(false);
+        return; // keep the image in state on failure
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+    setForm((prev) => ({ ...prev, coverImage: null }));
   };
 
-  // Metrics helpers
+  const removeGalleryImage = async (idx: number) => {
+    const asset = (form.imageAssets ?? [])[idx];
+    if (asset?.path) {
+      setIsDeleting(true);
+      try {
+        await firebaseBlobStorage.deleteFile(asset.path);
+        setSessionUploadedPaths((prev) => prev.filter((p) => p !== asset.path));
+      } catch (err) {
+        if (import.meta.env.DEV) console.error("Gallery image deletion failed:", err);
+        toast({
+          title: "Deletion Failed",
+          description: "Could not remove the image from storage. Please try again.",
+          variant: "destructive",
+        });
+        setIsDeleting(false);
+        return; // keep the image in state on failure
+      } finally {
+        setIsDeleting(false);
+      }
+    }
+    setForm((prev) => ({
+      ...prev,
+      imageAssets: (prev.imageAssets ?? []).filter((_, i) => i !== idx),
+    }));
+  };
+
+  // ---------- Metrics helpers ----------
+
   const addMetric = () => updateField("metrics", [...(form.metrics ?? []), { label: "", value: "" }]);
   const updateMetric = (idx: number, field: "label" | "value", val: string) => {
     const updated = [...(form.metrics ?? [])];
@@ -219,7 +328,8 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   };
   const removeMetric = (idx: number) => updateField("metrics", (form.metrics ?? []).filter((_, i) => i !== idx));
 
-  // Testimonials helpers
+  // ---------- Testimonials helpers ----------
+
   const addTestimonial = () =>
     updateField("testimonials", [...(form.testimonials ?? []), { description: "", username: "" }]);
   const updateTestimonial = (idx: number, field: "description" | "username", val: string) => {
@@ -230,7 +340,8 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   const removeTestimonial = (idx: number) =>
     updateField("testimonials", (form.testimonials ?? []).filter((_, i) => i !== idx));
 
-  // Submit
+  // ---------- Submit ----------
+
   const handleSave = () => {
     const result = formSchema.safeParse(form);
     if (!result.success) {
@@ -244,8 +355,17 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
       return;
     }
     setErrors({});
-    onSave(result.data, editingEvent?.id ?? null);
+    // Clear session paths — these are now saved; skip orphan cleanup on close
+    setSessionUploadedPaths([]);
+    const eventData: Omit<Event, "id" | "createdAt" | "updatedAt"> = {
+      ...result.data,
+      coverImage: result.data.coverImage as ImageAsset,
+      imageAssets: result.data.imageAssets ?? [],
+    };
+    onSave(eventData, editingEvent?.id ?? null);
   };
+
+  const isBusy = uploadingCover || uploadingGallery || isDeleting;
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -327,7 +447,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
           </div>
 
           {/* Cover Image Upload */}
-          <Field label="Cover Image" required error={errors.coverImageUrl}>
+          <Field label="Cover Image" required error={errors.coverImage}>
             <input
               ref={coverInputRef}
               type="file"
@@ -335,7 +455,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
               className="hidden"
               onChange={(e) => {
                 const file = e.target.files?.[0];
-                if (file) handleImageUpload(file, "cover");
+                if (file) handleCoverUpload(file);
                 e.target.value = "";
               }}
             />
@@ -344,19 +464,20 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
                 type="button"
                 variant="outline"
                 size="sm"
-                disabled={uploadingCover || uploadingGallery}
+                disabled={isBusy}
                 onClick={() => coverInputRef.current?.click()}
               >
                 <Upload size={16} className="mr-1" />
                 {uploadingCover ? "Uploading…" : "Upload Cover"}
               </Button>
-              {form.coverImageUrl && (
+              {form.coverImage && (
                 <div className="relative w-16 h-16 rounded-lg overflow-hidden border border-border">
-                  <img src={form.coverImageUrl} alt="Cover" className="w-full h-full object-cover" />
+                  <img src={form.coverImage.url} alt="Cover" className="w-full h-full object-cover" />
                   <button
                     type="button"
-                    className="absolute top-0 right-0 bg-destructive text-destructive-foreground rounded-bl p-0.5"
-                    onClick={() => updateField("coverImageUrl", "")}
+                    disabled={isBusy}
+                    className="absolute top-0 right-0 bg-destructive text-destructive-foreground rounded-bl p-0.5 disabled:opacity-50"
+                    onClick={removeCoverImage}
                   >
                     <X size={12} />
                   </button>
@@ -383,20 +504,21 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
               type="button"
               variant="outline"
               size="sm"
-              disabled={uploadingCover || uploadingGallery}
+              disabled={isBusy}
               onClick={() => galleryInputRef.current?.click()}
             >
               <Upload size={16} className="mr-1" />
-              Add Image
+              {uploadingGallery ? "Uploading…" : "Add Image"}
             </Button>
-            {(form.images ?? []).length > 0 && (
+            {(form.imageAssets ?? []).length > 0 && (
               <div className="flex flex-wrap gap-2 mt-2">
-                {(form.images ?? []).map((url, idx) => (
+                {(form.imageAssets ?? []).map((asset, idx) => (
                   <div key={idx} className="relative w-16 h-16 rounded-lg overflow-hidden border border-border">
-                    <img src={url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img src={asset.url} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" />
                     <button
                       type="button"
-                      className="absolute top-0 right-0 bg-destructive text-destructive-foreground rounded-bl p-0.5"
+                      disabled={isBusy}
+                      className="absolute top-0 right-0 bg-destructive text-destructive-foreground rounded-bl p-0.5 disabled:opacity-50"
                       onClick={() => removeGalleryImage(idx)}
                     >
                       <X size={12} />
@@ -470,7 +592,7 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
           {/* Actions */}
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
-            <Button onClick={handleSave} className="gradient-warm text-primary-foreground">
+            <Button onClick={handleSave} disabled={isBusy} className="gradient-warm text-primary-foreground">
               {editingEvent ? "Update" : "Create"}
             </Button>
           </div>

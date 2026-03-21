@@ -109,7 +109,7 @@ const EventDetail = () => {
   const status = statusConfig[event.status];
   const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
   const isCompleted = event.status === EventStatus.COMPLETED;
-  const gallery = event.images ?? [];
+  const gallery = (event.imageAssets ?? []).map((a) => a.url);
   const shownGallery = gallery.slice(0, galleryVisible);
   const hasMorePhotos = galleryVisible < gallery.length;
   const backHash = isCompleted ? "/#past-events" : "/#events";
@@ -120,7 +120,7 @@ const EventDetail = () => {
 
       {/* Hero */}
       <div className="relative h-72 md:h-96">
-        <img src={event.coverImageUrl} alt={event.title} className="w-full h-full object-cover" />
+        <img src={event.coverImage.url} alt={event.title} className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-foreground/50" />
         <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
           <div className="container">
