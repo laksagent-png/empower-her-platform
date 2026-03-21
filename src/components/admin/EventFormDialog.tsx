@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 import { CalendarIcon, Upload, X, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
@@ -149,16 +149,19 @@ const EventFormDialog = ({ open, onOpenChange, editingEvent, onSave }: Props) =>
   const endDate = millisToDate(form.endDateTime);
   const endTime = millisToTimeStr(form.endDateTime);
 
-  // Reset form when dialog opens
+  // Sync form when editingEvent changes or dialog opens
+  useEffect(() => {
+    if (open) {
+      setForm(editingEvent ? eventToForm(editingEvent) : emptyForm);
+      setErrors({});
+    }
+  }, [open, editingEvent]);
+
   const handleOpenChange = useCallback(
     (isOpen: boolean) => {
-      if (isOpen) {
-        setForm(editingEvent ? eventToForm(editingEvent) : emptyForm);
-        setErrors({});
-      }
       onOpenChange(isOpen);
     },
-    [editingEvent, onOpenChange]
+    [onOpenChange]
   );
 
   const updateField = <K extends keyof FormData>(key: K, value: FormData[K]) =>
