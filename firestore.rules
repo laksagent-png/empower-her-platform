@@ -1,0 +1,17 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Events collection:
+    // - Anyone (including unauthenticated visitors) can read events so the
+    //   public homepage and event-detail pages work without login.
+    // - Only authenticated users (admins) can create, update, or delete events.
+    match /events/{eventId} {
+      allow read: if true;
+      allow create, update, delete: if request.auth != null;
+    }
+
+    // All other collections are denied by default.
+  }
+}

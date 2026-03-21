@@ -76,3 +76,40 @@ export async function fetchPastEvents(): Promise<Event[]> {
     return [];
   }
 }
+
+/**
+ * Create a new event in Firestore.
+ * Automatically sets both `createdAt` and `updatedAt` to the current timestamp.
+ * Returns the new document's ID.
+ */
+export async function createEvent(
+  data: Omit<Event, "id" | "createdAt" | "updatedAt">
+): Promise<string> {
+  const now = Date.now();
+  return database.createDocument(EVENTS_COLLECTION, {
+    ...data,
+    createdAt: now,
+    updatedAt: now,
+  } as Record<string, unknown>);
+}
+
+/**
+ * Update an existing event in Firestore.
+ * Automatically updates the `updatedAt` timestamp.
+ */
+export async function updateEvent(
+  id: string,
+  patch: Partial<Omit<Event, "id" | "createdAt">>
+): Promise<void> {
+  return database.updateDocument(EVENTS_COLLECTION, id, {
+    ...patch,
+    updatedAt: Date.now(),
+  } as Record<string, unknown>);
+}
+
+/**
+ * Delete an event from Firestore by its document ID.
+ */
+export async function deleteEvent(id: string): Promise<void> {
+  return database.deleteDocument(EVENTS_COLLECTION, id);
+}

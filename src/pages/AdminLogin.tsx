@@ -93,10 +93,6 @@ const AdminLogin = () => {
               </>
             )}
           </Button>
-
-          <p className="text-xs text-center text-muted-foreground">
-            Mock credentials: admin@aagaj.org / aagaj2026
-          </p>
         </form>
       </div>
     </div>

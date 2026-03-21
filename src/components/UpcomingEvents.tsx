@@ -1,9 +1,10 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { useEventStore } from "@/stores/eventStore";
+import { fetchUpcomingEvents } from "@/services/firebase";
 import { EventStatus, type Event } from "@/types/firebase";
 
 const PAGE_SIZE = 10;
@@ -29,7 +30,10 @@ const handleShare = (e: React.MouseEvent, event: Event) => {
 };
 
 const UpcomingEvents = () => {
-  const allEvents = useEventStore((s) => s.events);
+  const { data: allEvents = [] } = useQuery({
+    queryKey: ["events", "upcoming"],
+    queryFn: fetchUpcomingEvents,
+  });
   const events = useMemo(
     () => allEvents.filter((e) => e.status !== EventStatus.COMPLETED),
     [allEvents]

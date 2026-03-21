@@ -1,5 +1,6 @@
-import { useMemo, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Clock, MapPin, ExternalLink, Share2,
@@ -7,7 +8,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { format } from "date-fns";
-import { useEventStore } from "@/stores/eventStore";
+import { fetchEvent } from "@/services/firebase";
 import { EventStatus, type Event } from "@/types/firebase";
 import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/Navbar";
@@ -58,8 +59,11 @@ const GalleryImage = ({ src, alt, onClick }: { src: string; alt: string; onClick
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const allEvents = useEventStore((s) => s.events);
-  const event = useMemo(() => allEvents.find((e) => e.id === id), [allEvents, id]);
+  const { data: event, isLoading, isError } = useQuery({
+    queryKey: ["event", id],
+    queryFn: () => fetchEvent(id!),
+    enabled: !!id,
+  });
 
   const [lightbox, setLightbox] = useState<{ images: string[]; index: number } | null>(null);
   const [galleryVisible, setGalleryVisible] = useState(GALLERY_INITIAL);
@@ -73,7 +77,20 @@ const EventDetail = () => {
     [lightbox]
   );
 
-  if (!event) {
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container py-32 text-center">
+          <Skeleton className="h-10 w-64 mx-auto mb-4" />
+          <Skeleton className="h-4 w-96 mx-auto" />
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
+  if (isError || !event) {
     return (
       <div className="min-h-screen bg-background">
         <Navbar />

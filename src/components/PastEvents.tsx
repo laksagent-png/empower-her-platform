@@ -1,19 +1,18 @@
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Quote, ImageIcon } from "lucide-react";
 import { format } from "date-fns";
-import { useEventStore } from "@/stores/eventStore";
-import { EventStatus } from "@/types/firebase";
+import { fetchPastEvents } from "@/services/firebase";
 
 const PAGE_SIZE = 5;
 
 const PastEvents = () => {
-  const allEvents = useEventStore((s) => s.events);
-  const pastEvents = useMemo(
-    () => allEvents.filter((e) => e.status === EventStatus.COMPLETED),
-    [allEvents]
-  );
+  const { data: pastEvents = [] } = useQuery({
+    queryKey: ["events", "past"],
+    queryFn: fetchPastEvents,
+  });
   const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const shownEvents = pastEvents.slice(0, visibleCount);
   const hasMore = visibleCount < pastEvents.length;
