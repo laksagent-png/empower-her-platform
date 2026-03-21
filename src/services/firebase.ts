@@ -1,4 +1,4 @@
-import type { Event } from "@/types/firebase";
+import type { Event, ImpactStatsDoc, ContributionDoc } from "@/types/firebase";
 import { EventStatus } from "@/types/firebase";
 import { database } from "./database";
 import { validateEvent } from "@/schemas/event.schema";
@@ -112,4 +112,88 @@ export async function updateEvent(
  */
 export async function deleteEvent(id: string): Promise<void> {
   return database.deleteDocument(EVENTS_COLLECTION, id);
+}
+
+// ---------- Impact Metrics (stats/impact) ----------
+
+const STATS_COLLECTION = "stats";
+const IMPACT_DOC_ID = "impact";
+
+/**
+ * Fetch the dynamic impact metrics document.
+ * Returns null if the document does not exist or on error.
+ */
+export async function fetchImpactStats(): Promise<ImpactStatsDoc | null> {
+  try {
+    return await database.fetchDocument<ImpactStatsDoc>(STATS_COLLECTION, IMPACT_DOC_ID);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to fetch impact stats:", error);
+    }
+    return null;
+  }
+}
+
+/**
+ * Persist the dynamic impact metrics document (full overwrite).
+ */
+export async function updateImpactStats(
+  doc: Omit<ImpactStatsDoc, "updatedAt">,
+  updatedBy?: string
+): Promise<void> {
+  const payload: ImpactStatsDoc = {
+    ...doc,
+    updatedAt: Date.now(),
+    ...(updatedBy ? { updatedBy } : {}),
+  };
+  try {
+    await database.upsertDocument(STATS_COLLECTION, IMPACT_DOC_ID, payload as Record<string, unknown>);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to update impact stats:", error);
+    }
+    throw error;
+  }
+}
+
+// ---------- Contribution / Bank Details (settings/contribution) ----------
+
+const SETTINGS_COLLECTION = "settings";
+const CONTRIBUTION_DOC_ID = "contribution";
+
+/**
+ * Fetch the contribution / bank details document.
+ * Returns null if the document does not exist or on error.
+ */
+export async function fetchContributionDetails(): Promise<ContributionDoc | null> {
+  try {
+    return await database.fetchDocument<ContributionDoc>(SETTINGS_COLLECTION, CONTRIBUTION_DOC_ID);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to fetch contribution details:", error);
+    }
+    return null;
+  }
+}
+
+/**
+ * Persist the contribution / bank details document (full overwrite).
+ */
+export async function updateContributionDetails(
+  doc: Omit<ContributionDoc, "updatedAt">,
+  updatedBy?: string
+): Promise<void> {
+  const payload: ContributionDoc = {
+    ...doc,
+    updatedAt: Date.now(),
+    ...(updatedBy ? { updatedBy } : {}),
+  };
+  try {
+    await database.upsertDocument(SETTINGS_COLLECTION, CONTRIBUTION_DOC_ID, payload as Record<string, unknown>);
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to update contribution details:", error);
+    }
+    throw error;
+  }
 }

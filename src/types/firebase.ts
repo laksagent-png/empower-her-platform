@@ -57,6 +57,28 @@ export interface GlobalStats {
   districtsReached: number;
 }
 
+/**
+ * A single dynamically-configured impact metric shown in ImpactSection.
+ * `iconKey` maps to a Lucide icon via the IMPACT_ICONS whitelist.
+ */
+export interface ImpactMetric {
+  /** Stable identifier (nanoid / uuid) for list operations. */
+  id: string;
+  label: string;
+  value: number;
+  /** Optional display suffix, e.g. "+" or "k+". */
+  suffix?: string;
+  /** Key into the IMPACT_ICONS constant. */
+  iconKey: string;
+}
+
+/** Firestore document stored at stats/impact. */
+export interface ImpactStatsDoc {
+  metrics: ImpactMetric[];
+  updatedAt: number;
+  updatedBy?: string;
+}
+
 export interface BankAccount {
   accountName: string;
   accountNumber: string;
@@ -67,5 +89,11 @@ export interface BankAccount {
 export interface ContributionDetails {
   upiId: string;
   bankAccount: BankAccount;
-  qrCodeUrl: string;
+  qrCodeUrl?: string;
+}
+
+/** Firestore document stored at settings/contribution. */
+export interface ContributionDoc extends ContributionDetails {
+  updatedAt: number;
+  updatedBy?: string;
 }

@@ -1,12 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { motion, useInView } from "framer-motion";
-import { Users, BookOpen, MapPin, Target } from "lucide-react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchImpactStats } from "@/services/firebase";
+import { IMPACT_ICONS, DEFAULT_ICON_KEY } from "@/constants/impactIcons";
+import type { ImpactMetric } from "@/types/firebase";
 
-const stats = [
-  { icon: Users, label: "Women Empowered", value: 2500, suffix: "+" },
-  { icon: BookOpen, label: "Workshops Held", value: 85, suffix: "" },
-  { icon: MapPin, label: "Districts Reached", value: 18, suffix: "" },
-  { icon: Target, label: "Job Placements", value: 340, suffix: "+" },
+/** Fallback metrics shown when the Firestore document has not been created yet. */
+const DEFAULT_STATS: ImpactMetric[] = [
+  { id: "1", label: "Women Empowered", value: 2500, suffix: "+", iconKey: "users" },
+  { id: "2", label: "Workshops Held", value: 85, suffix: "", iconKey: "book-open" },
+  { id: "3", label: "Districts Reached", value: 18, suffix: "", iconKey: "map-pin" },
+  { id: "4", label: "Job Placements", value: 340, suffix: "+", iconKey: "target" },
 ];
 
 const CountUp = ({ target, suffix }: { target: number; suffix: string }) => {
@@ -40,6 +44,17 @@ const CountUp = ({ target, suffix }: { target: number; suffix: string }) => {
 };
 
 const ImpactSection = () => {
+  const { data: impactDoc } = useQuery({
+    queryKey: ["impact-stats"],
+    queryFn: fetchImpactStats,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  const metrics =
+    impactDoc?.metrics && impactDoc.metrics.length > 0
+      ? impactDoc.metrics
+      : DEFAULT_STATS;
+
   return (
     <section id="impact" className="py-20 md:py-28 bg-card">
       <div className="container">
@@ -57,24 +72,32 @@ const ImpactSection = () => {
           </h2>
         </motion.div>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-8">
-          {stats.map((s, i) => (
-            <motion.div
-              key={s.label}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.15 }}
-              className="bg-background rounded-xl p-6 md:p-8 text-center shadow-card hover:shadow-card-hover transition-shadow"
-            >
-              <div className="w-14 h-14 rounded-full gradient-warm flex items-center justify-center mx-auto mb-4">
-                <s.icon size={26} className="text-primary-foreground" />
-              </div>
-              <p className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-1">
-                <CountUp target={s.value} suffix={s.suffix} />
-              </p>
-              <p className="text-muted-foreground text-sm font-medium">{s.label}</p>
-            </motion.div>
-          ))}
+          {metrics.map((metric, i) => {
+            const iconEntry =
+              IMPACT_ICONS[metric.iconKey] ?? IMPACT_ICONS[DEFAULT_ICON_KEY];
+            const MetricIcon = iconEntry.Icon;
+
+            return (
+              <motion.div
+                key={metric.id}
+                initial={{ opacity: 0, y: 30 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: i * 0.15 }}
+                className="bg-background rounded-xl p-6 md:p-8 text-center shadow-card hover:shadow-card-hover transition-shadow"
+              >
+                <div className="w-14 h-14 rounded-full gradient-warm flex items-center justify-center mx-auto mb-4">
+                  <MetricIcon size={26} className="text-primary-foreground" />
+                </div>
+                <p className="font-heading text-3xl md:text-4xl font-bold text-foreground mb-1">
+                  <CountUp target={metric.value} suffix={metric.suffix ?? ""} />
+                </p>
+                <p className="text-muted-foreground text-sm font-medium">
+                  {metric.label}
+                </p>
+              </motion.div>
+            );
+          })}
         </div>
         {/* Progress bar */}
         <motion.div

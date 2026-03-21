@@ -11,6 +11,8 @@ import {
 } from "@/services/firebase";
 import { format } from "date-fns";
 import EventFormDialog from "@/components/admin/EventFormDialog";
+import ImpactSettingsEditor from "@/components/admin/ImpactSettingsEditor";
+import ContributionSettingsEditor from "@/components/admin/ContributionSettingsEditor";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -27,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus, Pencil, Trash2, LogOut, Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
@@ -157,6 +160,14 @@ const AdminDashboard = () => {
       </header>
 
       <main className="container py-8">
+        <Tabs defaultValue="events">
+          <TabsList className="mb-6">
+            <TabsTrigger value="events">Events</TabsTrigger>
+            <TabsTrigger value="settings">Settings</TabsTrigger>
+          </TabsList>
+
+          {/* ── Events tab ── */}
+          <TabsContent value="events">
         {/* Toolbar */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
           <h1 className="font-heading text-2xl md:text-3xl font-bold text-foreground">Event Management</h1>
@@ -237,6 +248,20 @@ const AdminDashboard = () => {
             </TableBody>
           </Table>
         </div>
+          </TabsContent>
+
+          {/* ── Settings tab ── */}
+          <TabsContent value="settings">
+            <div className="max-w-2xl space-y-10">
+              <div className="bg-card rounded-xl shadow-card p-6 md:p-8">
+                <ImpactSettingsEditor />
+              </div>
+              <div className="bg-card rounded-xl shadow-card p-6 md:p-8">
+                <ContributionSettingsEditor />
+              </div>
+            </div>
+          </TabsContent>
+        </Tabs>
       </main>
 
       {/* Form Dialog */}

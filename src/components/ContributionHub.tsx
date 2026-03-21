@@ -1,18 +1,36 @@
 import { motion } from "framer-motion";
-import { Copy, Check, Banknote, Heart, ExternalLink } from "lucide-react";
+import { Copy, Check, Banknote, Heart, ExternalLink, QrCode } from "lucide-react";
 import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { fetchContributionDetails } from "@/services/firebase";
 
-const bankDetails = {
+const DEFAULT_BANK = {
   name: "Aagaj Foundation",
   account: "1234567890123456",
   ifsc: "SBIN0001234",
   branch: "Main Branch, New Delhi",
 };
 
-const upiId = "aagaj@upi";
+const DEFAULT_UPI = "aagaj@upi";
 
 const ContributionHub = () => {
   const [copied, setCopied] = useState<string | null>(null);
+
+  const { data: contributionDoc } = useQuery({
+    queryKey: ["contribution-details"],
+    queryFn: fetchContributionDetails,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
+  // Resolve values from Firestore or fall back to defaults
+  const upiId = contributionDoc?.upiId ?? DEFAULT_UPI;
+  const qrCodeUrl = contributionDoc?.qrCodeUrl ?? "";
+  const bankDetails = {
+    name: contributionDoc?.bankAccount?.accountName ?? DEFAULT_BANK.name,
+    account: contributionDoc?.bankAccount?.accountNumber ?? DEFAULT_BANK.account,
+    ifsc: contributionDoc?.bankAccount?.ifscCode ?? DEFAULT_BANK.ifsc,
+    branch: contributionDoc?.bankAccount?.branch ?? DEFAULT_BANK.branch,
+  };
 
   const copyText = (text: string, key: string) => {
     navigator.clipboard.writeText(text);
@@ -83,6 +101,23 @@ const ContributionHub = () => {
               >
                 Open UPI App
               </a>
+
+              {/* QR Code (shown only when URL is stored in Firestore) */}
+              {qrCodeUrl && (
+                <div className="flex flex-col items-center gap-2 pt-2">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <QrCode size={14} />
+                    <span>Scan to Pay</span>
+                  </div>
+                  <a href={qrCodeUrl} target="_blank" rel="noopener noreferrer">
+                    <img
+                      src={qrCodeUrl}
+                      alt="UPI QR Code"
+                      className="w-32 h-32 object-contain rounded-lg border border-border hover:opacity-80 transition-opacity"
+                    />
+                  </a>
+                </div>
+              )}
             </div>
 
             {/* Bank */}
