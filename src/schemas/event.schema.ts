@@ -17,13 +17,7 @@ export const EventSchema = z
     description: z.string().min(10).max(500),
     registrationUrl: z.string().url(),
     status: z.nativeEnum(EventStatus),
-    /** Backward-compatible URL string; always set. */
-    coverImageUrl: z.string().url(),
-    /** New: cover image with Storage path for deletion. Optional for backward compat. */
-    coverImage: imageAssetSchema.optional(),
-    /** Backward-compatible URL array; always set. */
-    images: z.array(z.string().url()).optional(),
-    /** New: gallery assets with Storage paths for deletion. Optional for backward compat. */
+    coverImage: imageAssetSchema,
     imageAssets: z.array(imageAssetSchema).optional(),
     testimonials: z
       .array(
