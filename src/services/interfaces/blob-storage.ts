@@ -10,4 +10,17 @@ export interface IBlobStorage {
    * Resolve a provider-specific storage path to a publicly accessible URL.
    */
   getFileUrl(path: string): Promise<string>;
+
+  /**
+   * Upload a file to the given storage path.
+   * Returns the public download URL and the storage path that can be used
+   * later to delete the object.
+   */
+  uploadFile(file: File, path: string): Promise<{ url: string; path: string }>;
+
+  /**
+   * Permanently delete the object at the given storage path.
+   * Must only be called by authenticated admin users.
+   */
+  deleteFile(path: string): Promise<void>;
 }

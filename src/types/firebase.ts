@@ -5,6 +5,17 @@ export enum EventStatus {
   COMPLETED = "COMPLETED",
 }
 
+/**
+ * A stored image asset with a public download URL and the Firebase Storage
+ * object path needed for deletion.
+ */
+export interface ImageAsset {
+  /** Public Firebase Storage download URL. */
+  url: string;
+  /** Firebase Storage object path, e.g. "events/tmp/{sessionId}/cover/...". */
+  path: string;
+}
+
 export interface Event {
   id: string;
   title: string;
@@ -20,10 +31,27 @@ export interface Event {
   /** Google Form or external registration URL. */
   registrationUrl: string;
   status: EventStatus;
-  /** Hero / cover image URL. */
+  /**
+   * Hero / cover image URL.
+   * Kept for backward compatibility with pre-migration documents.
+   * New documents also set `coverImage` with path metadata.
+   */
   coverImageUrl: string;
-  /** Array of gallery image URLs. */
+  /**
+   * Cover image asset with URL and Storage path for deletion.
+   * Present on events created / updated after the storage migration.
+   */
+  coverImage?: ImageAsset;
+  /**
+   * Array of gallery image URLs.
+   * Kept for backward compatibility; new documents also set `imageAssets`.
+   */
   images?: string[];
+  /**
+   * Gallery image assets with URLs and Storage paths for deletion.
+   * Present on events created / updated after the storage migration.
+   */
+  imageAssets?: ImageAsset[];
   testimonials?: Array<{
     description: string;
     username: string;

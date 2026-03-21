@@ -1,0 +1,29 @@
+rules_version = '2';
+
+// Firebase Storage security rules for Empower Her Platform.
+//
+// Design decisions:
+//  - Event images are publicly readable so that the web app can serve them
+//    without requiring users to be signed in.
+//  - Write access (upload, delete, metadata update) is restricted to
+//    authenticated users only.  In the current setup the only users who
+//    authenticate are admins, so this is sufficient.  If non-admin user
+//    authentication is added in the future, tighten the write rules to check
+//    custom claims (e.g. request.auth.token.admin == true).
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Event images – uploaded and deleted by authenticated admins only;
+    // publicly readable by everyone (no sign-in required for the public site).
+    match /events/{allPaths=**} {
+      allow read: if true;
+      allow write: if request.auth != null;
+    }
+
+    // Deny everything else by default.
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
