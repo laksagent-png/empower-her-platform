@@ -9,6 +9,7 @@ vi.mock("@/services/database", () => ({
     createDocument: vi.fn(),
     updateDocument: vi.fn(),
     deleteDocument: vi.fn(),
+    upsertDocument: vi.fn(),
   },
 }));
 
@@ -24,13 +25,19 @@ import {
   createEvent,
   updateEvent,
   deleteEvent,
+  fetchImpactStats,
+  updateImpactStats,
+  fetchContributionDetails,
+  updateContributionDetails,
 } from "@/services/firebase";
 import { EventStatus } from "@/types/firebase";
 
 const mockFetchCollection = database.fetchCollection as ReturnType<typeof vi.fn>;
+const mockFetchDocument = database.fetchDocument as ReturnType<typeof vi.fn>;
 const mockCreateDocument = database.createDocument as ReturnType<typeof vi.fn>;
 const mockUpdateDocument = database.updateDocument as ReturnType<typeof vi.fn>;
 const mockDeleteDocument = database.deleteDocument as ReturnType<typeof vi.fn>;
+const mockUpsertDocument = database.upsertDocument as ReturnType<typeof vi.fn>;
 
 describe("fetchUpcomingEvents", () => {
   beforeEach(() => {
@@ -155,5 +162,106 @@ describe("deleteEvent", () => {
     const [collection, id] = mockDeleteDocument.mock.calls[0];
     expect(collection).toBe("events");
     expect(id).toBe("evt-456");
+  });
+});
+
+describe("fetchImpactStats", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetchDocument.mockResolvedValue(null);
+  });
+
+  it("fetches from stats/impact", async () => {
+    const doc = { metrics: [], updatedAt: 12345 };
+    mockFetchDocument.mockResolvedValue(doc);
+    const result = await fetchImpactStats();
+    expect(mockFetchDocument).toHaveBeenCalledOnce();
+    const [col, id] = mockFetchDocument.mock.calls[0];
+    expect(col).toBe("stats");
+    expect(id).toBe("impact");
+    expect(result).toEqual(doc);
+  });
+
+  it("returns null on error", async () => {
+    mockFetchDocument.mockRejectedValue(new Error("network error"));
+    const result = await fetchImpactStats();
+    expect(result).toBeNull();
+  });
+});
+
+describe("updateImpactStats", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpsertDocument.mockResolvedValue(undefined);
+  });
+
+  it("upserts stats/impact with updatedAt timestamp", async () => {
+    const before = Date.now();
+    const metrics = [{ id: "1", label: "Test", value: 100, iconKey: "users" }];
+    await updateImpactStats({ metrics });
+    const after = Date.now();
+
+    expect(mockUpsertDocument).toHaveBeenCalledOnce();
+    const [col, id, payload] = mockUpsertDocument.mock.calls[0];
+    expect(col).toBe("stats");
+    expect(id).toBe("impact");
+    expect(payload.metrics).toEqual(metrics);
+    expect(payload.updatedAt).toBeGreaterThanOrEqual(before);
+    expect(payload.updatedAt).toBeLessThanOrEqual(after);
+  });
+});
+
+describe("fetchContributionDetails", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetchDocument.mockResolvedValue(null);
+  });
+
+  it("fetches from settings/contribution", async () => {
+    const doc = { upiId: "test@upi", qrCodeUrl: "", bankAccount: { accountName: "Test", accountNumber: "123", ifscCode: "SBIN", branch: "Main" }, updatedAt: 12345 };
+    mockFetchDocument.mockResolvedValue(doc);
+    const result = await fetchContributionDetails();
+    expect(mockFetchDocument).toHaveBeenCalledOnce();
+    const [col, id] = mockFetchDocument.mock.calls[0];
+    expect(col).toBe("settings");
+    expect(id).toBe("contribution");
+    expect(result).toEqual(doc);
+  });
+
+  it("returns null on error", async () => {
+    mockFetchDocument.mockRejectedValue(new Error("network error"));
+    const result = await fetchContributionDetails();
+    expect(result).toBeNull();
+  });
+});
+
+describe("updateContributionDetails", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUpsertDocument.mockResolvedValue(undefined);
+  });
+
+  it("upserts settings/contribution with updatedAt timestamp", async () => {
+    const before = Date.now();
+    const doc = {
+      upiId: "test@upi",
+      qrCodeUrl: "",
+      bankAccount: {
+        accountName: "Test",
+        accountNumber: "123",
+        ifscCode: "SBIN",
+        branch: "Main",
+      },
+    };
+    await updateContributionDetails(doc);
+    const after = Date.now();
+
+    expect(mockUpsertDocument).toHaveBeenCalledOnce();
+    const [col, id, payload] = mockUpsertDocument.mock.calls[0];
+    expect(col).toBe("settings");
+    expect(id).toBe("contribution");
+    expect(payload.upiId).toBe("test@upi");
+    expect(payload.updatedAt).toBeGreaterThanOrEqual(before);
+    expect(payload.updatedAt).toBeLessThanOrEqual(after);
   });
 });

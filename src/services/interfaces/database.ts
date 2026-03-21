@@ -64,4 +64,14 @@ export interface IDatabase {
    * Permanently delete a document by collection path and ID.
    */
   deleteDocument(collectionPath: string, id: string): Promise<void>;
+
+  /**
+   * Create or fully overwrite a document at the given collection path and ID.
+   * Unlike `updateDocument`, this succeeds even if the document does not yet exist.
+   */
+  upsertDocument(
+    collectionPath: string,
+    id: string,
+    data: Record<string, unknown>
+  ): Promise<void>;
 }

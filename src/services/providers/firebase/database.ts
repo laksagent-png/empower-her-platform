@@ -8,6 +8,7 @@ import {
   addDoc,
   updateDoc,
   deleteDoc,
+  setDoc,
   type DocumentData,
 } from "firebase/firestore";
 import type { IDatabase, QueryFilter } from "../../interfaces/database";
@@ -56,5 +57,14 @@ export class FirestoreDatabase implements IDatabase {
   async deleteDocument(collectionPath: string, id: string): Promise<void> {
     const docRef = doc(firestoreDb, collectionPath, id);
     await deleteDoc(docRef);
+  }
+
+  async upsertDocument(
+    collectionPath: string,
+    id: string,
+    data: Record<string, unknown>
+  ): Promise<void> {
+    const docRef = doc(firestoreDb, collectionPath, id);
+    await setDoc(docRef, data);
   }
 }
