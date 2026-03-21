@@ -1,4 +1,4 @@
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { format } from "date-fns";
 import { CalendarIcon, Upload, X, Plus, Trash2 } from "lucide-react";
 import { z } from "zod";
