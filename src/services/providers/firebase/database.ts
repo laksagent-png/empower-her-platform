@@ -5,6 +5,9 @@ import {
   getDocs,
   query,
   where,
+  addDoc,
+  updateDoc,
+  deleteDoc,
   type DocumentData,
 } from "firebase/firestore";
 import type { IDatabase, QueryFilter } from "../../interfaces/database";
@@ -30,5 +33,28 @@ export class FirestoreDatabase implements IDatabase {
     const q = constraints.length > 0 ? query(ref, ...constraints) : ref;
     const snapshot = await getDocs(q);
     return snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as T));
+  }
+
+  async createDocument(
+    collectionPath: string,
+    data: Record<string, unknown>
+  ): Promise<string> {
+    const ref = collection(firestoreDb, collectionPath);
+    const docRef = await addDoc(ref, data);
+    return docRef.id;
+  }
+
+  async updateDocument(
+    collectionPath: string,
+    id: string,
+    patch: Record<string, unknown>
+  ): Promise<void> {
+    const docRef = doc(firestoreDb, collectionPath, id);
+    await updateDoc(docRef, patch);
+  }
+
+  async deleteDocument(collectionPath: string, id: string): Promise<void> {
+    const docRef = doc(firestoreDb, collectionPath, id);
+    await deleteDoc(docRef);
   }
 }

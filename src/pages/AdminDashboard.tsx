@@ -1,8 +1,14 @@
 import { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
-import { useEventStore } from "@/stores/eventStore";
 import { EventStatus, type Event } from "@/types/firebase";
+import {
+  fetchEvents,
+  createEvent,
+  updateEvent,
+  deleteEvent,
+} from "@/services/firebase";
 import { format } from "date-fns";
 import EventFormDialog from "@/components/admin/EventFormDialog";
 import { Button } from "@/components/ui/button";
@@ -40,10 +46,34 @@ function isUpcoming(e: Event) {
 const AdminDashboard = () => {
   const { logout } = useAuth();
   const navigate = useNavigate();
-  const allEvents = useEventStore((s) => s.events);
-  const addEvent = useEventStore((s) => s.addEvent);
-  const updateEvent = useEventStore((s) => s.updateEvent);
-  const deleteEvent = useEventStore((s) => s.deleteEvent);
+  const queryClient = useQueryClient();
+
+  const { data: allEvents = [] } = useQuery({
+    queryKey: ["events"],
+    queryFn: fetchEvents,
+  });
+
+  const createMutation = useMutation({
+    mutationFn: (data: Omit<Event, "id" | "createdAt" | "updatedAt">) =>
+      createEvent(data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["events"] }),
+  });
+
+  const updateMutation = useMutation({
+    mutationFn: ({
+      id,
+      data,
+    }: {
+      id: string;
+      data: Partial<Omit<Event, "id" | "createdAt">>;
+    }) => updateEvent(id, data),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["events"] }),
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: (id: string) => deleteEvent(id),
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["events"] }),
+  });
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
@@ -64,26 +94,45 @@ const AdminDashboard = () => {
     setDialogOpen(true);
   };
 
-  const handleSave = (data: Omit<Event, "id" | "createdAt" | "updatedAt">, editingId: string | null) => {
-    if (editingId) {
-      updateEvent(editingId, data);
-      toast({ title: "Event Updated", description: `"${data.title}" has been updated.` });
-    } else {
-      addEvent(data);
-      toast({ title: "Event Created", description: `"${data.title}" has been added.` });
+  const handleSave = async (
+    data: Omit<Event, "id" | "createdAt" | "updatedAt">,
+    editingId: string | null
+  ) => {
+    try {
+      if (editingId) {
+        await updateMutation.mutateAsync({ id: editingId, data });
+        toast({ title: "Event Updated", description: `"${data.title}" has been updated.` });
+      } else {
+        await createMutation.mutateAsync(data);
+        toast({ title: "Event Created", description: `"${data.title}" has been added.` });
+      }
+      setDialogOpen(false);
+    } catch {
+      toast({
+        title: "Error",
+        description: "Failed to save the event. Please try again.",
+        variant: "destructive",
+      });
     }
-    setDialogOpen(false);
   };
 
   const handleDelete = (event: Event) => {
     if (window.confirm(`Delete "${event.title}"?`)) {
-      deleteEvent(event.id);
-      toast({ title: "Event Deleted", description: `"${event.title}" has been removed.` });
+      deleteMutation.mutate(event.id, {
+        onSuccess: () =>
+          toast({ title: "Event Deleted", description: `"${event.title}" has been removed.` }),
+        onError: () =>
+          toast({
+            title: "Error",
+            description: "Failed to delete the event. Please try again.",
+            variant: "destructive",
+          }),
+      });
     }
   };
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     navigate("/admin");
   };
 
@@ -202,3 +251,4 @@ const AdminDashboard = () => {
 };
 
 export default AdminDashboard;
+

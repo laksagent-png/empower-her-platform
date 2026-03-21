@@ -41,4 +41,27 @@ export interface IDatabase {
     collection: string,
     ...filters: QueryFilter[]
   ): Promise<T[]>;
+
+  /**
+   * Create a new document in the given collection with auto-generated ID.
+   * Returns the new document's ID.
+   */
+  createDocument(
+    collectionPath: string,
+    data: Record<string, unknown>
+  ): Promise<string>;
+
+  /**
+   * Update (merge) fields on an existing document.
+   */
+  updateDocument(
+    collectionPath: string,
+    id: string,
+    patch: Record<string, unknown>
+  ): Promise<void>;
+
+  /**
+   * Permanently delete a document by collection path and ID.
+   */
+  deleteDocument(collectionPath: string, id: string): Promise<void>;
 }
