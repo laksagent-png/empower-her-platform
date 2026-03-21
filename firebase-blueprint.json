@@ -1,0 +1,107 @@
+{
+  "entities": {
+    "Event": {
+      "title": "Event",
+      "description": "An event created by an admin.",
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the event."
+        },
+        "description": {
+          "type": "string",
+          "description": "The description of the event."
+        },
+        "shortDescription": {
+          "type": "string",
+          "description": "A short description of the event."
+        },
+        "startDateTime": {
+          "type": "number",
+          "description": "The start date and time of the event in milliseconds."
+        },
+        "endDateTime": {
+          "type": "number",
+          "description": "The end date and time of the event in milliseconds."
+        },
+        "location": {
+          "type": "string",
+          "description": "The location of the event."
+        },
+        "capacity": {
+          "type": "number",
+          "description": "The maximum number of attendees."
+        },
+        "registeredCount": {
+          "type": "number",
+          "description": "The current number of registered attendees."
+        },
+        "status": {
+          "type": "string",
+          "enum": ["DRAFT", "PUBLISHED", "CANCELLED", "COMPLETED"],
+          "description": "The status of the event."
+        },
+        "coverImage": {
+          "type": "string",
+          "description": "The URL of the cover image."
+        },
+        "galleryImages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of URLs for gallery images."
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "An array of tags for the event."
+        },
+        "registrationUrl": {
+          "type": "string",
+          "description": "The URL for registration."
+        },
+        "hostName": {
+          "type": "string",
+          "description": "The name of the host."
+        },
+        "hostContact": {
+          "type": "string",
+          "description": "The contact information for the host."
+        },
+        "createdAt": {
+          "type": "number",
+          "description": "The creation timestamp in milliseconds."
+        },
+        "updatedAt": {
+          "type": "number",
+          "description": "The last update timestamp in milliseconds."
+        }
+      },
+      "required": [
+        "title",
+        "description",
+        "shortDescription",
+        "startDateTime",
+        "endDateTime",
+        "location",
+        "capacity",
+        "registeredCount",
+        "status",
+        "createdAt",
+        "updatedAt"
+      ]
+    }
+  },
+  "firestore": {
+    "events": {
+      "schema": {
+        "$ref": "#/entities/Event"
+      },
+      "description": "The collection of events."
+    }
+  }
+}

@@ -1,0 +1,111 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: events
+    // Document ID: auto-generated
+    // Fields:
+    //   - title: string (required, min 3, max 100)
+    //   - description: string (required, min 10, max 500)
+    //   - shortDescription: string (required)
+    //   - startDateTime: number (required, positive)
+    //   - endDateTime: number (required, positive, > startDateTime)
+    //   - location: string (required)
+    //   - capacity: number (required)
+    //   - registeredCount: number (required)
+    //   - status: string (required, enum: DRAFT, PUBLISHED, CANCELLED, COMPLETED)
+    //   - coverImage: string (required, url)
+    //   - galleryImages: list of strings (optional, urls)
+    //   - tags: list of strings (optional)
+    //   - registrationUrl: string (required, url)
+    //   - hostName: string (required, min 1, max 100)
+    //   - hostContact: string (optional)
+    //   - createdAt: number (required)
+    //   - updatedAt: number (required)
+    //
+    // ===============================================================
+
+    // ===============================================================
+    // Helper Functions
+    // ===============================================================
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function validStringLength(field, minLen, maxLen) {
+      return request.resource.data[field] is string &&
+        request.resource.data[field].size() >= minLen &&
+        request.resource.data[field].size() <= maxLen;
+    }
+
+    function isValidUrl(url) {
+      return url is string && (url == "" || url.matches("^https://.*") || url.matches("^http://.*"));
+    }
+
+    function isPositive(field) {
+      return request.resource.data[field] is number && request.resource.data[field] > 0;
+    }
+
+    function isValidList(list, maxSize) {
+      return list is list && list.size() <= maxSize;
+    }
+
+    function isValidOptionalString(field, minLen, maxLen) {
+      return !('field' in request.resource.data) ||
+             (request.resource.data[field] is string &&
+              request.resource.data[field].size() >= minLen &&
+              request.resource.data[field].size() <= maxLen);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    // ===============================================================
+    // Domain Validators
+    // ===============================================================
+    function isValidEvent(data) {
+      return hasRequiredFields([
+        'title', 'description', 'startDateTime', 'endDateTime',
+        'venueName', 'venueUrl', 'registrationUrl', 'status',
+        'coverImageUrl', 'hostName', 'createdAt', 'updatedAt'
+      ]) &&
+      validStringLength('title', 3, 100) &&
+      validStringLength('description', 10, 500) &&
+      validStringLength('venueName', 1, 200) &&
+      validStringLength('hostName', 1, 100) &&
+      isValidUrl(data.venueUrl) &&
+      isValidUrl(data.registrationUrl) &&
+      isValidUrl(data.coverImageUrl) &&
+      isPositive('startDateTime') &&
+      isPositive('endDateTime') &&
+      data.endDateTime > data.startDateTime &&
+      data.status in ['FILLING_FAST', 'REGISTRATION_CLOSED', 'ONLINE', 'COMPLETED'] &&
+      data.createdAt is number &&
+      data.updatedAt is number;
+    }
+
+    match /events/{eventId} {
+      // Allow public read access to all events
+      allow read: if true;
+      
+      allow create: if isAuthenticated() && isValidEvent(request.resource.data);
+      
+      allow update: if isAuthenticated() && isValidEvent(request.resource.data) &&
+        areImmutableFieldsUnchanged(['createdAt']);
+        
+      allow delete: if isAuthenticated();
+    }
+  }
+}
