@@ -4,10 +4,12 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   Calendar, Clock, MapPin, ExternalLink, Share2,
   ArrowLeft, Quote, X, ChevronLeft, ChevronRight,
+  CheckCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { useEventStore } from "@/stores/eventStore";
 import { EventStatus, type Event } from "@/types/firebase";
+import { Skeleton } from "@/components/ui/skeleton";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
@@ -30,6 +32,28 @@ const handleShare = (event: Event) => {
   } else {
     window.open(`https://wa.me/?text=${encodeURIComponent(text + " " + url)}`, "_blank");
   }
+};
+
+/** Image with skeleton placeholder until loaded */
+const GalleryImage = ({ src, alt, onClick }: { src: string; alt: string; onClick: () => void }) => {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState(false);
+
+  if (error) return null;
+
+  return (
+    <button onClick={onClick} className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity relative">
+      {!loaded && <Skeleton className="absolute inset-0 w-full h-full" />}
+      <img
+        src={src}
+        alt={alt}
+        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? "opacity-100" : "opacity-0"}`}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onError={() => setError(true)}
+      />
+    </button>
+  );
 };
 
 const EventDetail = () => {
@@ -145,13 +169,12 @@ const EventDetail = () => {
                 <h2 className="font-heading text-xl font-bold text-foreground mb-4">Gallery</h2>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                   {shownGallery.map((img, idx) => (
-                    <button
+                    <GalleryImage
                       key={idx}
+                      src={img}
+                      alt={`Gallery ${idx + 1}`}
                       onClick={() => setLightbox({ images: gallery, index: idx })}
-                      className="aspect-square rounded-lg overflow-hidden hover:opacity-80 transition-opacity"
-                    >
-                      <img src={img} alt={`Gallery ${idx + 1}`} className="w-full h-full object-cover" loading="lazy" />
-                    </button>
+                    />
                   ))}
                 </div>
                 {hasMorePhotos && (
@@ -171,9 +194,23 @@ const EventDetail = () => {
           {/* Sidebar */}
           <div className="space-y-6">
             <div className="bg-card rounded-xl p-6 shadow-card space-y-4">
+              {isCompleted && (
+                <div className="flex items-center gap-2 text-muted-foreground bg-muted rounded-lg px-3 py-2 mb-2">
+                  <CheckCircle size={16} className="text-secondary" />
+                  <span className="text-sm font-medium">This event has concluded</span>
+                </div>
+              )}
+
+              <h3 className="font-heading text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                {isCompleted ? "When & Where It Took Place" : "Event Details"}
+              </h3>
+
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Calendar size={18} className="text-primary" />
-                <span>{format(new Date(event.startDateTime), "EEEE, dd MMMM yyyy")}</span>
+                <span>
+                  {isCompleted ? "Held on " : ""}
+                  {format(new Date(event.startDateTime), "EEEE, dd MMMM yyyy")}
+                </span>
               </div>
               <div className="flex items-center gap-3 text-muted-foreground">
                 <Clock size={18} className="text-primary" />

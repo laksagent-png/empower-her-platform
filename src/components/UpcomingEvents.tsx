@@ -1,7 +1,7 @@
-import { useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useMemo, useState, useRef, useEffect, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Calendar, Clock, MapPin, ExternalLink, Share2 } from "lucide-react";
+import { Calendar, Clock, MapPin, ExternalLink, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
 import { useEventStore } from "@/stores/eventStore";
 import { EventStatus, type Event } from "@/types/firebase";
@@ -39,6 +39,36 @@ const UpcomingEvents = () => {
   const hasMore = visibleCount < events.length;
   const navigate = useNavigate();
 
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    checkScroll();
+    const el = scrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    const ro = new ResizeObserver(checkScroll);
+    ro.observe(el);
+    return () => {
+      el.removeEventListener("scroll", checkScroll);
+      ro.disconnect();
+    };
+  }, [checkScroll, shownEvents.length]);
+
+  const scroll = (dir: 1 | -1) => {
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: dir * el.clientWidth * 0.8, behavior: "smooth" });
+  };
+
   return (
     <section id="events" className="py-20 md:py-28 bg-background">
       <div className="container">
@@ -60,93 +90,131 @@ const UpcomingEvents = () => {
           <p className="text-center text-muted-foreground">No upcoming events at the moment. Check back soon!</p>
         ) : (
           <>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-              {shownEvents.map((event, i) => {
-                const status = statusConfig[event.status];
-                const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
-                return (
+            <div className="relative">
+              {/* Left arrow */}
+              {canScrollLeft && (
+                <button
+                  onClick={() => scroll(-1)}
+                  className="absolute -left-4 md:-left-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-card shadow-card-hover flex items-center justify-center text-foreground hover:text-primary transition-colors"
+                  aria-label="Scroll left"
+                >
+                  <ChevronLeft size={22} />
+                </button>
+              )}
+
+              {/* Scroll container */}
+              <div
+                ref={scrollRef}
+                className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide pb-4"
+              >
+                {shownEvents.map((event, i) => {
+                  const status = statusConfig[event.status];
+                  const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
+                  return (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, y: 30 }}
+                      whileInView={{ opacity: 1, y: 0 }}
+                      viewport={{ once: true }}
+                      transition={{ delay: Math.min(i, 3) * 0.1 }}
+                      className="min-w-[300px] max-w-[340px] shrink-0 bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col cursor-pointer"
+                      onClick={() => navigate(`/events/${event.id}`)}
+                    >
+                      {event.coverImageUrl && (
+                        <div className="relative">
+                          <img src={event.coverImageUrl} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
+                          {status && (
+                            <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}>
+                              {status.label}
+                            </span>
+                          )}
+                        </div>
+                      )}
+                      <div className="p-5 flex flex-col flex-1">
+                        <h3 className="font-heading text-xl font-bold text-foreground mb-2 hover:text-primary transition-colors">
+                          {event.title}
+                        </h3>
+                        <div className="space-y-1.5 mb-3 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-2">
+                            <Calendar size={14} /> {format(new Date(event.startDateTime), "dd MMM yyyy")}
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <Clock size={14} />
+                            {format(new Date(event.startDateTime), "h:mm a")} – {format(new Date(event.endDateTime), "h:mm a")}
+                          </div>
+                          {event.venueName && (
+                            <div className="flex items-center gap-2">
+                              <MapPin size={14} />
+                              <span
+                                onClick={(e) => { e.stopPropagation(); window.open(event.venueUrl, "_blank"); }}
+                                className="underline hover:text-primary transition-colors cursor-pointer"
+                              >
+                                {event.venueName}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-5 flex-1 line-clamp-3">{event.description}</p>
+                        <div className="flex gap-3 mt-auto">
+                          <a
+                            href={isClosed ? undefined : event.registrationUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold min-h-[48px] transition-opacity ${
+                              isClosed
+                                ? "bg-muted text-muted-foreground cursor-not-allowed"
+                                : "gradient-warm text-primary-foreground hover:opacity-90"
+                            }`}
+                            onClick={(e) => { e.stopPropagation(); if (isClosed) e.preventDefault(); }}
+                          >
+                            <ExternalLink size={16} />
+                            {isClosed ? "Closed" : "Register"}
+                          </a>
+                          <button
+                            onClick={(ev) => handleShare(ev, event)}
+                            className="p-3 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors min-h-[48px]"
+                            aria-label="Share event"
+                          >
+                            <Share2 size={18} />
+                          </button>
+                        </div>
+                      </div>
+                    </motion.div>
+                  );
+                })}
+
+                {hasMore && (
                   <motion.div
-                    key={event.id}
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    transition={{ delay: i * 0.15 }}
-                    className="bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col cursor-pointer"
-                    onClick={() => navigate(`/events/${event.id}`)}
+                    className="min-w-[300px] max-w-[340px] shrink-0 bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-primary/30 hover:border-primary/60 min-h-[320px]"
+                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
                   >
-                    {event.coverImageUrl && (
-                      <div className="relative">
-                        <img src={event.coverImageUrl} alt={event.title} className="w-full h-48 object-cover" loading="lazy" />
-                        {status && (
-                          <span className={`absolute top-3 right-3 px-3 py-1 rounded-full text-xs font-bold ${status.className}`}>
-                            {status.label}
-                          </span>
-                        )}
+                    <div className="p-10 flex flex-col items-center gap-4 text-center">
+                      <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
+                        <ChevronRight size={28} className="text-primary" />
                       </div>
-                    )}
-                    <div className="p-5 flex flex-col flex-1">
-                      <h3 className="font-heading text-xl font-bold text-foreground mb-2 hover:text-primary transition-colors">
-                        {event.title}
-                      </h3>
-                      <div className="space-y-1.5 mb-3 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <Calendar size={14} /> {format(new Date(event.startDateTime), "dd MMM yyyy")}
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Clock size={14} />
-                          {format(new Date(event.startDateTime), "h:mm a")} – {format(new Date(event.endDateTime), "h:mm a")}
-                        </div>
-                        {event.venueName && (
-                          <div className="flex items-center gap-2">
-                            <MapPin size={14} />
-                            <span
-                              onClick={(e) => { e.stopPropagation(); window.open(event.venueUrl, "_blank"); }}
-                              className="underline hover:text-primary transition-colors cursor-pointer"
-                            >
-                              {event.venueName}
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-5 flex-1">{event.description}</p>
-                      <div className="flex gap-3 mt-auto">
-                        <a
-                          href={isClosed ? undefined : event.registrationUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-sm font-semibold min-h-[48px] transition-opacity ${
-                            isClosed
-                              ? "bg-muted text-muted-foreground cursor-not-allowed"
-                              : "gradient-warm text-primary-foreground hover:opacity-90"
-                          }`}
-                          onClick={(e) => { e.stopPropagation(); if (isClosed) e.preventDefault(); }}
-                        >
-                          <ExternalLink size={16} />
-                          {isClosed ? "Closed" : "Register"}
-                        </a>
-                        <button
-                          onClick={(ev) => handleShare(ev, event)}
-                          className="p-3 rounded-lg border border-border text-muted-foreground hover:text-primary hover:border-primary transition-colors min-h-[48px]"
-                          aria-label="Share event"
-                        >
-                          <Share2 size={18} />
-                        </button>
-                      </div>
+                      <p className="font-heading text-lg font-bold text-foreground">Load More</p>
+                      <p className="text-sm text-muted-foreground">
+                        {events.length - visibleCount} more event{events.length - visibleCount !== 1 ? "s" : ""}
+                      </p>
                     </div>
                   </motion.div>
-                );
-              })}
-            </div>
-            {hasMore && (
-              <div className="text-center mt-10">
-                <button
-                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  className="px-8 py-3 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-primary-foreground transition-colors min-h-[48px]"
-                >
-                  Load More Events
-                </button>
+                )}
               </div>
-            )}
+
+              {/* Right arrow */}
+              {canScrollRight && (
+                <button
+                  onClick={() => scroll(1)}
+                  className="absolute -right-4 md:-right-6 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-card shadow-card-hover flex items-center justify-center text-foreground hover:text-primary transition-colors"
+                  aria-label="Scroll right"
+                >
+                  <ChevronRight size={22} />
+                </button>
+              )}
+            </div>
           </>
         )}
       </div>
