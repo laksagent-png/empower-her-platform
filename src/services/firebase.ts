@@ -77,6 +77,73 @@ export async function fetchPastEvents(): Promise<Event[]> {
   }
 }
 
+/** Result shape returned by paginated event fetch functions. */
+export interface EventsPage {
+  events: Event[];
+  /** Whether there are more events beyond this page. */
+  hasMore: boolean;
+  /**
+   * The ID of the last event on this page.
+   * Pass as `startAfterId` to the next call to retrieve the following page.
+   */
+  lastId: string | null;
+}
+
+/**
+ * Fetch a single page of upcoming events ordered by start date (ascending).
+ * Pass the `lastId` from the previous result as `startAfterId` to get the next page.
+ */
+export async function fetchUpcomingEventsPage(
+  pageSize: number,
+  startAfterId?: string
+): Promise<EventsPage> {
+  const now = Date.now();
+  try {
+    const result = await database.fetchCollectionPage<Event>(
+      EVENTS_COLLECTION,
+      {
+        limit: pageSize,
+        startAfterId,
+        orderBy: { field: "startDateTime", direction: "asc" },
+      },
+      { field: "startDateTime", op: ">=", value: now }
+    );
+    return { events: result.items, hasMore: result.hasMore, lastId: result.lastId };
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to fetch upcoming events page:", error);
+    }
+    return { events: [], hasMore: false, lastId: null };
+  }
+}
+
+/**
+ * Fetch a single page of past (completed) events ordered by start date (descending).
+ * Pass the `lastId` from the previous result as `startAfterId` to get the next page.
+ */
+export async function fetchPastEventsPage(
+  pageSize: number,
+  startAfterId?: string
+): Promise<EventsPage> {
+  try {
+    const result = await database.fetchCollectionPage<Event>(
+      EVENTS_COLLECTION,
+      {
+        limit: pageSize,
+        startAfterId,
+        orderBy: { field: "startDateTime", direction: "desc" },
+      },
+      { field: "status", op: "==", value: EventStatus.COMPLETED }
+    );
+    return { events: result.items, hasMore: result.hasMore, lastId: result.lastId };
+  } catch (error) {
+    if (import.meta.env.DEV) {
+      console.error("Failed to fetch past events page:", error);
+    }
+    return { events: [], hasMore: false, lastId: null };
+  }
+}
+
 /**
  * Create a new event in Firestore.
  * Automatically sets both `createdAt` and `updatedAt` to the current timestamp.

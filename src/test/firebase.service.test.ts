@@ -5,6 +5,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("@/services/database", () => ({
   database: {
     fetchCollection: vi.fn(),
+    fetchCollectionPage: vi.fn(),
     fetchDocument: vi.fn(),
     createDocument: vi.fn(),
     updateDocument: vi.fn(),
@@ -22,6 +23,8 @@ import { database } from "@/services/database";
 import {
   fetchUpcomingEvents,
   fetchPastEvents,
+  fetchUpcomingEventsPage,
+  fetchPastEventsPage,
   createEvent,
   updateEvent,
   deleteEvent,
@@ -33,6 +36,7 @@ import {
 import { EventStatus } from "@/types/firebase";
 
 const mockFetchCollection = database.fetchCollection as ReturnType<typeof vi.fn>;
+const mockFetchCollectionPage = database.fetchCollectionPage as ReturnType<typeof vi.fn>;
 const mockFetchDocument = database.fetchDocument as ReturnType<typeof vi.fn>;
 const mockCreateDocument = database.createDocument as ReturnType<typeof vi.fn>;
 const mockUpdateDocument = database.updateDocument as ReturnType<typeof vi.fn>;
@@ -91,6 +95,93 @@ describe("fetchPastEvents", () => {
     mockFetchCollection.mockRejectedValue(new Error("network error"));
     const result = await fetchPastEvents();
     expect(result).toEqual([]);
+  });
+});
+
+describe("fetchUpcomingEventsPage", () => {
+  const mockPageResult = { items: [], hasMore: false, lastId: null };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetchCollectionPage.mockResolvedValue(mockPageResult);
+  });
+
+  it("passes page size and startDateTime >= now filter ordered by startDateTime asc", async () => {
+    const before = Date.now();
+    await fetchUpcomingEventsPage(10);
+    const after = Date.now();
+
+    expect(mockFetchCollectionPage).toHaveBeenCalledOnce();
+    const [collection, pagination, filter] = mockFetchCollectionPage.mock.calls[0];
+    expect(collection).toBe("events");
+    expect(pagination.limit).toBe(10);
+    expect(pagination.orderBy).toEqual({ field: "startDateTime", direction: "asc" });
+    expect(pagination.startAfterId).toBeUndefined();
+    expect(filter.field).toBe("startDateTime");
+    expect(filter.op).toBe(">=");
+    expect(filter.value).toBeGreaterThanOrEqual(before);
+    expect(filter.value).toBeLessThanOrEqual(after);
+  });
+
+  it("passes startAfterId cursor when provided", async () => {
+    await fetchUpcomingEventsPage(5, "cursor-id-123");
+
+    const [, pagination] = mockFetchCollectionPage.mock.calls[0];
+    expect(pagination.startAfterId).toBe("cursor-id-123");
+  });
+
+  it("maps page result to EventsPage shape", async () => {
+    mockFetchCollectionPage.mockResolvedValue({
+      items: [{ id: "evt-1", title: "Test" }],
+      hasMore: true,
+      lastId: "evt-1",
+    });
+    const result = await fetchUpcomingEventsPage(10);
+    expect(result.events).toHaveLength(1);
+    expect(result.hasMore).toBe(true);
+    expect(result.lastId).toBe("evt-1");
+  });
+
+  it("returns empty page on error", async () => {
+    mockFetchCollectionPage.mockRejectedValue(new Error("network error"));
+    const result = await fetchUpcomingEventsPage(10);
+    expect(result).toEqual({ events: [], hasMore: false, lastId: null });
+  });
+});
+
+describe("fetchPastEventsPage", () => {
+  const mockPageResult = { items: [], hasMore: false, lastId: null };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockFetchCollectionPage.mockResolvedValue(mockPageResult);
+  });
+
+  it("passes page size and status == COMPLETED filter ordered by startDateTime desc", async () => {
+    await fetchPastEventsPage(5);
+
+    expect(mockFetchCollectionPage).toHaveBeenCalledOnce();
+    const [collection, pagination, filter] = mockFetchCollectionPage.mock.calls[0];
+    expect(collection).toBe("events");
+    expect(pagination.limit).toBe(5);
+    expect(pagination.orderBy).toEqual({ field: "startDateTime", direction: "desc" });
+    expect(pagination.startAfterId).toBeUndefined();
+    expect(filter.field).toBe("status");
+    expect(filter.op).toBe("==");
+    expect(filter.value).toBe(EventStatus.COMPLETED);
+  });
+
+  it("passes startAfterId cursor when provided", async () => {
+    await fetchPastEventsPage(5, "cursor-id-456");
+
+    const [, pagination] = mockFetchCollectionPage.mock.calls[0];
+    expect(pagination.startAfterId).toBe("cursor-id-456");
+  });
+
+  it("returns empty page on error", async () => {
+    mockFetchCollectionPage.mockRejectedValue(new Error("network error"));
+    const result = await fetchPastEventsPage(5);
+    expect(result).toEqual({ events: [], hasMore: false, lastId: null });
   });
 });
 
@@ -262,5 +353,22 @@ describe("updateContributionDetails", () => {
     expect(payload.upiId).toBe("test@upi");
     expect(payload.updatedAt).toBeGreaterThanOrEqual(before);
     expect(payload.updatedAt).toBeLessThanOrEqual(after);
+  });
+
+  it("persists accountType in bank account when provided", async () => {
+    const doc = {
+      upiId: "test@upi",
+      bankAccount: {
+        accountName: "Test",
+        accountNumber: "123",
+        ifscCode: "SBIN",
+        branch: "Main",
+        accountType: "Savings",
+      },
+    };
+    await updateContributionDetails(doc);
+
+    const [, , payload] = mockUpsertDocument.mock.calls[0];
+    expect(payload.bankAccount.accountType).toBe("Savings");
   });
 });

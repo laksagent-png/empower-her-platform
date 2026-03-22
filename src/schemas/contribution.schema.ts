@@ -5,6 +5,7 @@ export const BankAccountSchema = z.object({
   accountNumber: z.string().min(1, "Account number is required").max(50),
   ifscCode: z.string().min(1, "IFSC code is required").max(20),
   branch: z.string().min(1, "Branch is required").max(200),
+  accountType: z.string().max(50).optional(),
 });
 
 export const ContributionDocSchema = z.object({

@@ -84,6 +84,8 @@ export interface BankAccount {
   accountNumber: string;
   ifscCode: string;
   branch: string;
+  /** Account type, e.g. "Savings" or "Current". */
+  accountType?: string;
 }
 
 export interface ContributionDetails {

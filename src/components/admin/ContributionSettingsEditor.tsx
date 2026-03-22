@@ -13,6 +13,7 @@ const DEFAULT_DOC: Omit<ContributionDoc, "updatedAt"> = {
     accountNumber: "1234567890123456",
     ifscCode: "SBIN0001234",
     branch: "Main Branch, New Delhi",
+    accountType: "Savings",
   },
 };
 
@@ -36,6 +37,7 @@ const ContributionSettingsEditor = () => {
           accountNumber: serverDoc.bankAccount?.accountNumber ?? DEFAULT_DOC.bankAccount.accountNumber,
           ifscCode: serverDoc.bankAccount?.ifscCode ?? DEFAULT_DOC.bankAccount.ifscCode,
           branch: serverDoc.bankAccount?.branch ?? DEFAULT_DOC.bankAccount.branch,
+          accountType: serverDoc.bankAccount?.accountType ?? DEFAULT_DOC.bankAccount.accountType,
         },
       });
     }
@@ -146,6 +148,16 @@ const ContributionSettingsEditor = () => {
               value={form.bankAccount.branch}
               placeholder="e.g. Main Branch, New Delhi"
               onChange={(e) => setBankField("branch", e.target.value)}
+            />
+          </div>
+          <div className="space-y-1">
+            <label className="text-xs font-medium text-muted-foreground">
+              Account Type
+            </label>
+            <Input
+              value={form.bankAccount.accountType ?? ""}
+              placeholder="e.g. Savings"
+              onChange={(e) => setBankField("accountType", e.target.value)}
             />
           </div>
         </div>

@@ -23,6 +23,29 @@ export interface QueryFilter {
   value: unknown;
 }
 
+/** Options for paginated collection queries. */
+export interface PaginationOptions {
+  /** Maximum number of documents to return in a single page. */
+  limit: number;
+  /**
+   * Document ID of the last document on the previous page.
+   * When provided, the query returns documents after this cursor.
+   */
+  startAfterId?: string;
+  /** Field to order results by, along with sort direction. */
+  orderBy?: { field: string; direction?: "asc" | "desc" };
+}
+
+/** The result of a paginated collection query. */
+export interface PageResult<T> {
+  /** Documents on the current page. */
+  items: T[];
+  /** Whether there are more documents after this page. */
+  hasMore: boolean;
+  /** The ID of the last document in `items`, or null when the page is empty. */
+  lastId: string | null;
+}
+
 export interface IDatabase {
   /**
    * Fetch a single document by collection path and document ID.
@@ -41,6 +64,18 @@ export interface IDatabase {
     collection: string,
     ...filters: QueryFilter[]
   ): Promise<T[]>;
+
+  /**
+   * Fetch a single page of documents from a collection.
+   * Supports cursor-based pagination via `PaginationOptions.startAfterId`.
+   * Returns a `PageResult` with the page items, a `hasMore` flag, and the
+   * last document ID to use as the cursor for the next page.
+   */
+  fetchCollectionPage<T = Record<string, unknown>>(
+    collection: string,
+    pagination: PaginationOptions,
+    ...filters: QueryFilter[]
+  ): Promise<PageResult<T>>;
 
   /**
    * Create a new document in the given collection with auto-generated ID.
