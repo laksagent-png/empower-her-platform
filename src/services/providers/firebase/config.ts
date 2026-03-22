@@ -16,12 +16,7 @@ const missingVars = Object.entries(requiredEnvVars)
   .filter(([, value]) => !value)
   .map(([key]) => key);
 
-// Only throw when Firebase is actually needed (mock mode bypasses Firebase entirely).
-const isMockMode =
-  import.meta.env.VITE_USE_MOCK_DATA === "true" ||
-  !import.meta.env.VITE_FIREBASE_PROJECT_ID;
-
-if (missingVars.length > 0 && !isMockMode) {
+if (missingVars.length > 0) {
   throw new Error(
     `Missing required Firebase environment variables: ${missingVars.join(", ")}. ` +
       "Copy .env.example to .env.local and fill in your Firebase project credentials."
@@ -29,12 +24,12 @@ if (missingVars.length > 0 && !isMockMode) {
 }
 
 const firebaseConfig = {
-  apiKey: requiredEnvVars.VITE_FIREBASE_API_KEY ?? "mock",
-  authDomain: requiredEnvVars.VITE_FIREBASE_AUTH_DOMAIN ?? "mock.firebaseapp.com",
-  projectId: requiredEnvVars.VITE_FIREBASE_PROJECT_ID ?? "mock-project",
-  storageBucket: requiredEnvVars.VITE_FIREBASE_STORAGE_BUCKET ?? "mock.appspot.com",
-  messagingSenderId: requiredEnvVars.VITE_FIREBASE_MESSAGING_SENDER_ID ?? "000000000000",
-  appId: requiredEnvVars.VITE_FIREBASE_APP_ID ?? "1:000000000000:web:mock",
+  apiKey: requiredEnvVars.VITE_FIREBASE_API_KEY,
+  authDomain: requiredEnvVars.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: requiredEnvVars.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: requiredEnvVars.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: requiredEnvVars.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: requiredEnvVars.VITE_FIREBASE_APP_ID,
 };
 
 const app: FirebaseApp = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
