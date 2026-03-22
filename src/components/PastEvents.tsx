@@ -8,12 +8,35 @@ import { fetchPastEventsPage } from "@/services/firebase";
 
 const PAGE_SIZE = 5;
 
+const PastEventSkeleton = () => (
+  <div className="bg-background rounded-2xl overflow-hidden shadow-card animate-pulse">
+    <div className="h-64 md:h-80 bg-muted" />
+    <div className="p-6 md:p-8 space-y-4">
+      <div className="grid grid-cols-3 gap-4">
+        {[0, 1, 2].map((i) => (
+          <div key={i} className="text-center space-y-2">
+            <div className="h-8 bg-muted rounded mx-auto w-16" />
+            <div className="h-3 bg-muted rounded mx-auto w-20" />
+          </div>
+        ))}
+      </div>
+      <div className="bg-card rounded-xl p-5 space-y-2">
+        <div className="h-4 bg-muted rounded w-full" />
+        <div className="h-4 bg-muted rounded w-5/6" />
+        <div className="h-3 bg-muted rounded w-1/3" />
+      </div>
+    </div>
+  </div>
+);
+
 const PastEvents = () => {
   const {
     data,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
+    isPending,
+    isError,
   } = useInfiniteQuery({
     queryKey: ["events", "past", "pages"],
     queryFn: ({ pageParam }) =>
@@ -41,7 +64,13 @@ const PastEvents = () => {
           <h2 className="font-heading text-3xl md:text-5xl font-bold text-foreground">What We've Achieved</h2>
         </motion.div>
 
-        {pastEvents.length === 0 ? (
+        {isPending ? (
+          <div className="space-y-16">
+            {[0, 1, 2].map((i) => <PastEventSkeleton key={i} />)}
+          </div>
+        ) : isError ? (
+          <p className="text-center text-muted-foreground">Failed to load past events. Please try again later.</p>
+        ) : pastEvents.length === 0 ? (
           <p className="text-center text-muted-foreground">No past events yet.</p>
         ) : (
           <>
