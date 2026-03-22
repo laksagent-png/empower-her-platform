@@ -2,6 +2,7 @@ import { motion } from "framer-motion";
 import { Copy, Check, Banknote, Heart, ExternalLink, QrCode } from "lucide-react";
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { QRCodeCanvas } from "qrcode.react";
 import { fetchContributionDetails } from "@/services/firebase";
 
 const DEFAULT_BANK = {
@@ -24,7 +25,6 @@ const ContributionHub = () => {
 
   // Resolve values from Firestore or fall back to defaults
   const upiId = contributionDoc?.upiId ?? DEFAULT_UPI;
-  const qrCodeUrl = contributionDoc?.qrCodeUrl ?? "";
   const bankDetails = {
     name: contributionDoc?.bankAccount?.accountName ?? DEFAULT_BANK.name,
     account: contributionDoc?.bankAccount?.accountNumber ?? DEFAULT_BANK.account,
@@ -48,7 +48,7 @@ const ContributionHub = () => {
     </button>
   );
 
-  const upiDeepLink = `upi://pay?pa=${upiId}&pn=Aagaj%20Foundation&cu=INR`;
+  const upiDeepLink = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=Aagaj%20Foundation&cu=INR`;
 
   return (
     <section id="contribute" className="py-20 md:py-28 bg-background">
@@ -102,22 +102,20 @@ const ContributionHub = () => {
                 Open UPI App
               </a>
 
-              {/* QR Code (shown only when URL is stored in Firestore) */}
-              {qrCodeUrl && (
-                <div className="flex flex-col items-center gap-2 pt-2">
-                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <QrCode size={14} />
-                    <span>Scan to Pay</span>
-                  </div>
-                  <a href={qrCodeUrl} target="_blank" rel="noopener noreferrer">
-                    <img
-                      src={qrCodeUrl}
-                      alt="UPI QR Code"
-                      className="w-32 h-32 object-contain rounded-lg border border-border hover:opacity-80 transition-opacity"
-                    />
-                  </a>
+              {/* QR Code generated client-side from UPI deep link */}
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <QrCode size={14} />
+                  <span>Scan to Pay</span>
                 </div>
-              )}
+                <QRCodeCanvas
+                  value={upiDeepLink}
+                  size={128}
+                  includeMargin
+                  level="M"
+                  className="rounded-lg border border-border"
+                />
+              </div>
             </div>
 
             {/* Bank */}

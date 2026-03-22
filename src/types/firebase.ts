@@ -89,7 +89,6 @@ export interface BankAccount {
 export interface ContributionDetails {
   upiId: string;
   bankAccount: BankAccount;
-  qrCodeUrl?: string;
 }
 
 /** Firestore document stored at settings/contribution. */
