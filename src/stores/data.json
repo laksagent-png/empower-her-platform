@@ -1,0 +1,689 @@
+{
+  "events": [
+    {
+      "id": "u1",
+      "title": "Digital Literacy Workshop",
+      "startDateTime": 1776067200000,
+      "endDateTime": 1776088800000,
+      "venueName": "Community Hall, Sector 12, Jaipur",
+      "venueUrl": "https://maps.google.com/?q=Community+Hall+Sector+12+Jaipur",
+      "description": "Learn essential computer skills, internet safety, and how to use digital payment platforms.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "FILLING_FAST",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+        "path": "sample-event-images/event-digital.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u2",
+      "title": "Self-Defence Training Camp",
+      "startDateTime": 1776821400000,
+      "endDateTime": 1776835800000,
+      "venueName": "Rajiv Gandhi Stadium, Lucknow",
+      "venueUrl": "https://maps.google.com/?q=Rajiv+Gandhi+Stadium+Lucknow",
+      "description": "A hands-on self-defence camp for women of all ages. Professional trainers will guide you.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "ONLINE",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+        "path": "sample-event-images/event-selfdefense.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u3",
+      "title": "Financial Independence Seminar",
+      "startDateTime": 1777959000000,
+      "endDateTime": 1777973400000,
+      "venueName": "Town Hall, Patna",
+      "venueUrl": "https://maps.google.com/?q=Town+Hall+Patna",
+      "description": "Understand savings, investments, and government schemes designed for women.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "REGISTRATION_CLOSED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+        "path": "sample-event-images/event-finance.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u4",
+      "title": "Women in Leadership Summit",
+      "startDateTime": 1778556600000,
+      "endDateTime": 1778585400000,
+      "venueName": "ITC Grand, Kolkata",
+      "venueUrl": "https://maps.google.com/?q=ITC+Grand+Kolkata",
+      "description": "A day-long summit featuring inspiring women leaders sharing their journeys and insights.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "FILLING_FAST",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+        "path": "sample-event-images/event-entrepreneur.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u5",
+      "title": "Nutrition & Wellness Workshop",
+      "startDateTime": 1779251400000,
+      "endDateTime": 1779265800000,
+      "venueName": "District Hospital, Bhopal",
+      "venueUrl": "https://maps.google.com/?q=District+Hospital+Bhopal",
+      "description": "Expert-led sessions on balanced nutrition, maternal health, and mental wellness practices.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "ONLINE",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+        "path": "sample-event-images/event-health.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u6",
+      "title": "Legal Awareness Camp",
+      "startDateTime": 1780288200000,
+      "endDateTime": 1780302600000,
+      "venueName": "Panchayat Bhawan, Ranchi",
+      "venueUrl": "https://maps.google.com/?q=Panchayat+Bhawan+Ranchi",
+      "description": "Know your legal rights — property, domestic violence, workplace harassment, and more.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "FILLING_FAST",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+        "path": "sample-event-images/event-digital.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u7",
+      "title": "Art & Craft Skill Development",
+      "startDateTime": 1781062200000,
+      "endDateTime": 1781087400000,
+      "venueName": "Craft Village, Udaipur",
+      "venueUrl": "https://maps.google.com/?q=Craft+Village+Udaipur",
+      "description": "Hands-on training in handicrafts, block printing, and pottery for income generation.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "ONLINE",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+        "path": "sample-event-images/event-selfdefense.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u8",
+      "title": "Cyber Safety for Women",
+      "startDateTime": 1781760600000,
+      "endDateTime": 1781775000000,
+      "venueName": "IT Park Auditorium, Pune",
+      "venueUrl": "https://maps.google.com/?q=IT+Park+Auditorium+Pune",
+      "description": "Learn to protect yourself from online fraud, cyberstalking, and social media misuse.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "FILLING_FAST",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+        "path": "sample-event-images/event-finance.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u9",
+      "title": "Menstrual Hygiene Workshop",
+      "startDateTime": 1782361800000,
+      "endDateTime": 1782372600000,
+      "venueName": "Government School, Varanasi",
+      "venueUrl": "https://maps.google.com/?q=Government+School+Varanasi",
+      "description": "Breaking taboos — free sanitary kits, awareness sessions, and open Q&A for young women.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "ONLINE",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+        "path": "sample-event-images/event-entrepreneur.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u10",
+      "title": "Career Counselling Drive",
+      "startDateTime": 1783222200000,
+      "endDateTime": 1783247400000,
+      "venueName": "University Campus, Chandigarh",
+      "venueUrl": "https://maps.google.com/?q=University+Campus+Chandigarh",
+      "description": "One-on-one career guidance, resume building, and interview prep for young women graduates.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "FILLING_FAST",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+        "path": "sample-event-images/event-health.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u11",
+      "title": "Rural Women Empowerment Meet",
+      "startDateTime": 1784089800000,
+      "endDateTime": 1784107800000,
+      "venueName": "Community Center, Ajmer",
+      "venueUrl": "https://maps.google.com/?q=Community+Center+Ajmer",
+      "description": "Connecting rural women with government welfare schemes, SHG formation, and micro-finance.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "ONLINE",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+        "path": "sample-event-images/event-digital.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "u12",
+      "title": "Spoken English Bootcamp",
+      "startDateTime": 1784950200000,
+      "endDateTime": 1784968200000,
+      "venueName": "Public Library Hall, Indore",
+      "venueUrl": "https://maps.google.com/?q=Public+Library+Hall+Indore",
+      "description": "A 5-hour intensive spoken English bootcamp to boost confidence and employability.",
+      "registrationUrl": "https://forms.google.com/your-form-id",
+      "status": "FILLING_FAST",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+        "path": "sample-event-images/event-selfdefense.jpg"
+      },
+      "imageAssets": [],
+      "metrics": [],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p1",
+      "title": "Entrepreneurship Bootcamp 2025",
+      "startDateTime": 1762745400000,
+      "endDateTime": 1762774200000,
+      "venueName": "Convention Center, Delhi",
+      "venueUrl": "https://maps.google.com/?q=Convention+Center+Delhi",
+      "description": "Intensive bootcamp for aspiring women entrepreneurs across six districts.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+        "path": "sample-event-images/event-entrepreneur.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+          "path": "sample-event-images/event-entrepreneur.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+          "path": "sample-event-images/event-selfdefense.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+          "path": "sample-event-images/event-finance.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Women Trained",
+          "value": "120"
+        },
+        {
+          "label": "Businesses Launched",
+          "value": "28"
+        },
+        {
+          "label": "Districts",
+          "value": "6"
+        }
+      ],
+      "testimonials": [
+        {
+          "description": "This workshop changed my life. I started my own handicraft business and now support my entire family.",
+          "username": "Sunita Devi, Participant, Patna"
+        }
+      ],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p2",
+      "title": "Women's Health Awareness Camp",
+      "startDateTime": 1757907000000,
+      "endDateTime": 1757935800000,
+      "venueName": "Community Hall, Lucknow",
+      "venueUrl": "https://maps.google.com/?q=Community+Hall+Lucknow",
+      "description": "Health awareness camp covering regular checkups, nutrition, and mental wellness.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+        "path": "sample-event-images/event-health.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+          "path": "sample-event-images/event-finance.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+          "path": "sample-event-images/event-selfdefense.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+          "path": "sample-event-images/event-entrepreneur.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Women Reached",
+          "value": "350"
+        },
+        {
+          "label": "Free Checkups",
+          "value": "200"
+        },
+        {
+          "label": "Villages Covered",
+          "value": "12"
+        }
+      ],
+      "testimonials": [
+        {
+          "description": "For the first time, I understood the importance of regular health checkups. Thank you, Aagaj!",
+          "username": "Meena Kumari, Participant, Lucknow"
+        }
+      ],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p3",
+      "title": "Self-Defence Training — Batch II",
+      "startDateTime": 1755653400000,
+      "endDateTime": 1755671400000,
+      "venueName": "Sports Complex, Agra",
+      "venueUrl": "https://maps.google.com/?q=Sports+Complex+Agra",
+      "description": "Second batch of our popular self-defence training. 100+ women participated.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+        "path": "sample-event-images/event-selfdefense.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+          "path": "sample-event-images/event-selfdefense.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+          "path": "sample-event-images/event-entrepreneur.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Participants",
+          "value": "110"
+        },
+        {
+          "label": "Trainers",
+          "value": "8"
+        }
+      ],
+      "testimonials": [
+        {
+          "description": "I feel so much more confident walking alone. Every woman should attend this camp.",
+          "username": "Rani Sharma, Participant, Agra"
+        }
+      ],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p4",
+      "title": "Digital Payments Awareness Drive",
+      "startDateTime": 1752121800000,
+      "endDateTime": 1752136200000,
+      "venueName": "Block Office, Gaya",
+      "venueUrl": "https://maps.google.com/?q=Block+Office+Gaya",
+      "description": "Teaching rural women how to use UPI, mobile banking, and protect against digital fraud.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+        "path": "sample-event-images/event-digital.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+          "path": "sample-event-images/event-finance.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Women Trained",
+          "value": "85"
+        },
+        {
+          "label": "Villages",
+          "value": "9"
+        }
+      ],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p5",
+      "title": "Financial Literacy for SHGs",
+      "startDateTime": 1749101400000,
+      "endDateTime": 1749119400000,
+      "venueName": "Gram Panchayat, Muzaffarpur",
+      "venueUrl": "https://maps.google.com/?q=Gram+Panchayat+Muzaffarpur",
+      "description": "Workshops on savings, micro-finance, and bookkeeping for self-help group members.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+        "path": "sample-event-images/event-finance.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+          "path": "sample-event-images/event-finance.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+          "path": "sample-event-images/event-entrepreneur.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+          "path": "sample-event-images/event-selfdefense.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "SHGs Trained",
+          "value": "24"
+        },
+        {
+          "label": "Members Reached",
+          "value": "310"
+        }
+      ],
+      "testimonials": [
+        {
+          "description": "Now our SHG keeps proper accounts. We even got a bank loan after this training!",
+          "username": "Kavita Singh, SHG Leader, Muzaffarpur"
+        }
+      ],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p6",
+      "title": "Maternal Health Camp",
+      "startDateTime": 1746847800000,
+      "endDateTime": 1746869400000,
+      "venueName": "PHC, Sitamarhi",
+      "venueUrl": "https://maps.google.com/?q=PHC+Sitamarhi",
+      "description": "Free antenatal checkups, iron supplements distribution, and newborn care education.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+        "path": "sample-event-images/event-health.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+          "path": "sample-event-images/event-entrepreneur.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Women Checked",
+          "value": "175"
+        },
+        {
+          "label": "Kits Distributed",
+          "value": "175"
+        }
+      ],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p7",
+      "title": "Handicraft Exhibition & Sale",
+      "startDateTime": 1743481800000,
+      "endDateTime": 1743597000000,
+      "venueName": "Dilli Haat, New Delhi",
+      "venueUrl": "https://maps.google.com/?q=Dilli+Haat+New+Delhi",
+      "description": "Two-day exhibition showcasing handicrafts made by women trained through Aagaj programmes.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+        "path": "sample-event-images/event-entrepreneur.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-entrepreneur.jpg?alt=media&token=c22762f8-3238-4968-88e3-f32a4d9e2671",
+          "path": "sample-event-images/event-entrepreneur.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+          "path": "sample-event-images/event-selfdefense.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+          "path": "sample-event-images/event-finance.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-digital.jpg?alt=media&token=0b24e76f-9648-4906-b270-84a22d1fec70",
+          "path": "sample-event-images/event-digital.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Stalls",
+          "value": "40"
+        },
+        {
+          "label": "Revenue Generated",
+          "value": "₹3.2L"
+        },
+        {
+          "label": "Artisans",
+          "value": "65"
+        }
+      ],
+      "testimonials": [
+        {
+          "description": "Selling my own products at Dilli Haat was a dream come true. Aagaj made it possible.",
+          "username": "Fatima Begum, Artisan, Lucknow"
+        }
+      ],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    },
+    {
+      "id": "p8",
+      "title": "Voter Awareness Rally",
+      "startDateTime": 1741401000000,
+      "endDateTime": 1741415400000,
+      "venueName": "Gandhi Maidan, Patna",
+      "venueUrl": "https://maps.google.com/?q=Gandhi+Maidan+Patna",
+      "description": "International Women's Day rally promoting voter awareness and political participation.",
+      "registrationUrl": "",
+      "status": "COMPLETED",
+      "hostName": "Aagaj Foundation",
+      "hostContact": "+91-98765-43210",
+      "coverImage": {
+        "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+        "path": "sample-event-images/event-selfdefense.jpg"
+      },
+      "imageAssets": [
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-selfdefense.jpg?alt=media&token=3cd8fa0d-4284-4b67-9e24-97a254c0b2f4",
+          "path": "sample-event-images/event-selfdefense.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-finance.jpg?alt=media&token=a8fe2d85-bd9b-4903-a639-5121c6e111a8",
+          "path": "sample-event-images/event-finance.jpg"
+        },
+        {
+          "url": "https://firebasestorage.googleapis.com/v0/b/aagaj-88c40.firebasestorage.app/o/sample-event-images%2Fevent-health.jpg?alt=media&token=660dd263-0a62-4647-a6c6-e0790fbf4aa8",
+          "path": "sample-event-images/event-health.jpg"
+        }
+      ],
+      "metrics": [
+        {
+          "label": "Attendees",
+          "value": "500+"
+        },
+        {
+          "label": "New Voter IDs",
+          "value": "80"
+        }
+      ],
+      "testimonials": [],
+      "createdAt": 1774074600000,
+      "updatedAt": 1774074600000
+    }
+  ]
+}
