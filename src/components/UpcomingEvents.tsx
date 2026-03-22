@@ -1,10 +1,10 @@
 import { useMemo, useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Calendar, Clock, MapPin, ExternalLink, Share2, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
-import { fetchUpcomingEvents } from "@/services/firebase";
+import { fetchUpcomingEventsPage } from "@/services/firebase";
 import { EventStatus, type Event } from "@/types/firebase";
 
 const PAGE_SIZE = 10;
@@ -30,17 +30,28 @@ const handleShare = (e: React.MouseEvent, event: Event) => {
 };
 
 const UpcomingEvents = () => {
-  const { data: allEvents = [] } = useQuery({
-    queryKey: ["events", "upcoming"],
-    queryFn: fetchUpcomingEvents,
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["events", "upcoming", "pages"],
+    queryFn: ({ pageParam }) =>
+      fetchUpcomingEventsPage(PAGE_SIZE, pageParam as string | undefined),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? (lastPage.lastId ?? undefined) : undefined,
+    initialPageParam: undefined as string | undefined,
   });
+
   const events = useMemo(
-    () => allEvents.filter((e) => e.status !== EventStatus.COMPLETED),
-    [allEvents]
+    () =>
+      (data?.pages ?? [])
+        .flatMap((p) => p.events)
+        .filter((e) => e.status !== EventStatus.COMPLETED),
+    [data]
   );
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const shownEvents = events.slice(0, visibleCount);
-  const hasMore = visibleCount < events.length;
+
   const navigate = useNavigate();
 
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -65,7 +76,7 @@ const UpcomingEvents = () => {
       el.removeEventListener("scroll", checkScroll);
       ro.disconnect();
     };
-  }, [checkScroll, shownEvents.length]);
+  }, [checkScroll, events.length]);
 
   const scroll = (dir: 1 | -1) => {
     const el = scrollRef.current;
@@ -111,7 +122,7 @@ const UpcomingEvents = () => {
                 ref={scrollRef}
                 className="flex gap-6 overflow-x-auto scroll-smooth scrollbar-hide pb-4"
               >
-                {shownEvents.map((event, i) => {
+                {events.map((event, i) => {
                   const status = statusConfig[event.status];
                   const isClosed = event.status === EventStatus.REGISTRATION_CLOSED;
                   return (
@@ -187,21 +198,26 @@ const UpcomingEvents = () => {
                   );
                 })}
 
-                {hasMore && (
+                {hasNextPage && (
                   <motion.div
                     initial={{ opacity: 0, y: 30 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
-                    className="min-w-[300px] max-w-[340px] shrink-0 bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col items-center justify-center cursor-pointer border-2 border-dashed border-primary/30 hover:border-primary/60 min-h-[320px]"
-                    onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                    className={`min-w-[300px] max-w-[340px] shrink-0 bg-card rounded-xl overflow-hidden shadow-card hover:shadow-card-hover transition-shadow flex flex-col items-center justify-center border-2 border-dashed border-primary/30 hover:border-primary/60 min-h-[320px] ${
+                      isFetchingNextPage ? "opacity-60 cursor-not-allowed" : "cursor-pointer"
+                    }`}
+                    onClick={() => { if (!isFetchingNextPage) fetchNextPage(); }}
+                    role="button"
+                    aria-disabled={isFetchingNextPage}
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (!isFetchingNextPage && (e.key === "Enter" || e.key === " ")) fetchNextPage(); }}
                   >
                     <div className="p-10 flex flex-col items-center gap-4 text-center">
                       <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center">
                         <ChevronRight size={28} className="text-primary" />
                       </div>
-                      <p className="font-heading text-lg font-bold text-foreground">Load More</p>
-                      <p className="text-sm text-muted-foreground">
-                        {events.length - visibleCount} more event{events.length - visibleCount !== 1 ? "s" : ""}
+                      <p className="font-heading text-lg font-bold text-foreground">
+                        {isFetchingNextPage ? "Loading…" : "Load More"}
                       </p>
                     </div>
                   </motion.div>
@@ -227,3 +243,4 @@ const UpcomingEvents = () => {
 };
 
 export default UpcomingEvents;
+

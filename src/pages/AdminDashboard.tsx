@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/contexts/AuthContext";
@@ -30,10 +30,21 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 import { Plus, Pencil, Trash2, LogOut, Home } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 
 type FilterType = "all" | "upcoming" | "past";
+
+const ADMIN_PAGE_SIZE = 10;
 
 const statusLabel: Record<EventStatus, string> = {
   [EventStatus.FILLING_FAST]: "Filling Fast",
@@ -81,11 +92,24 @@ const AdminDashboard = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [filterType, setFilterType] = useState<FilterType>("all");
+  const [currentPage, setCurrentPage] = useState(1);
 
   const filteredEvents = useMemo(() => {
     if (filterType === "all") return allEvents;
     return allEvents.filter((e) => (filterType === "upcoming" ? isUpcoming(e) : !isUpcoming(e)));
   }, [allEvents, filterType]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredEvents.length / ADMIN_PAGE_SIZE));
+
+  const paginatedEvents = useMemo(() => {
+    const start = (currentPage - 1) * ADMIN_PAGE_SIZE;
+    return filteredEvents.slice(start, start + ADMIN_PAGE_SIZE);
+  }, [filteredEvents, currentPage]);
+
+  // Reset to page 1 whenever the filter changes.
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filterType]);
 
   const openCreate = () => {
     setEditingEvent(null);
@@ -201,14 +225,14 @@ const AdminDashboard = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filteredEvents.length === 0 ? (
+              {paginatedEvents.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
                     No events found. Create your first event!
                   </TableCell>
                 </TableRow>
               ) : (
-                filteredEvents.map((event) => (
+                paginatedEvents.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.title}</TableCell>
                     <TableCell className="hidden md:table-cell text-muted-foreground">
@@ -248,6 +272,63 @@ const AdminDashboard = () => {
             </TableBody>
           </Table>
         </div>
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="mt-4">
+            <Pagination>
+              <PaginationContent>
+                <PaginationItem>
+                  <PaginationPrevious
+                    onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                    aria-disabled={currentPage === 1}
+                    className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .filter(
+                    (page) =>
+                      page === 1 ||
+                      page === totalPages ||
+                      Math.abs(page - currentPage) <= 1
+                  )
+                  .reduce<(number | "ellipsis")[]>((acc, page, idx, arr) => {
+                    if (idx > 0 && page - (arr[idx - 1] as number) > 1) {
+                      acc.push("ellipsis");
+                    }
+                    acc.push(page);
+                    return acc;
+                  }, [])
+                  .map((item, idx) =>
+                    item === "ellipsis" ? (
+                      <PaginationItem key={`ellipsis-${idx}`}>
+                        <PaginationEllipsis />
+                      </PaginationItem>
+                    ) : (
+                      <PaginationItem key={item}>
+                        <PaginationLink
+                          isActive={item === currentPage}
+                          onClick={() => setCurrentPage(item as number)}
+                          className="cursor-pointer"
+                        >
+                          {item}
+                        </PaginationLink>
+                      </PaginationItem>
+                    )
+                  )}
+
+                <PaginationItem>
+                  <PaginationNext
+                    onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                    aria-disabled={currentPage === totalPages}
+                    className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                  />
+                </PaginationItem>
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
           </TabsContent>
 
           {/* ── Settings tab ── */}

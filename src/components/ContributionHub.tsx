@@ -30,6 +30,7 @@ const ContributionHub = () => {
     account: contributionDoc?.bankAccount?.accountNumber ?? DEFAULT_BANK.account,
     ifsc: contributionDoc?.bankAccount?.ifscCode ?? DEFAULT_BANK.ifsc,
     branch: contributionDoc?.bankAccount?.branch ?? DEFAULT_BANK.branch,
+    accountType: contributionDoc?.bankAccount?.accountType,
   };
 
   const copyText = (text: string, key: string) => {
@@ -129,6 +130,9 @@ const ContributionHub = () => {
                   { label: "A/C Number", value: bankDetails.account },
                   { label: "IFSC Code", value: bankDetails.ifsc },
                   { label: "Branch", value: bankDetails.branch },
+                  ...(bankDetails.accountType
+                    ? [{ label: "Account Type", value: bankDetails.accountType }]
+                    : []),
                 ].map((item) => (
                   <div key={item.label} className="flex items-center justify-between px-4 py-3">
                     <div>

@@ -1,21 +1,32 @@
-import { useState } from "react";
+import { useMemo } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Quote, ImageIcon } from "lucide-react";
 import { format } from "date-fns";
-import { fetchPastEvents } from "@/services/firebase";
+import { fetchPastEventsPage } from "@/services/firebase";
 
 const PAGE_SIZE = 5;
 
 const PastEvents = () => {
-  const { data: pastEvents = [] } = useQuery({
-    queryKey: ["events", "past"],
-    queryFn: fetchPastEvents,
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+  } = useInfiniteQuery({
+    queryKey: ["events", "past", "pages"],
+    queryFn: ({ pageParam }) =>
+      fetchPastEventsPage(PAGE_SIZE, pageParam as string | undefined),
+    getNextPageParam: (lastPage) =>
+      lastPage.hasMore ? (lastPage.lastId ?? undefined) : undefined,
+    initialPageParam: undefined as string | undefined,
   });
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const shownEvents = pastEvents.slice(0, visibleCount);
-  const hasMore = visibleCount < pastEvents.length;
+
+  const pastEvents = useMemo(
+    () => (data?.pages ?? []).flatMap((p) => p.events),
+    [data]
+  );
 
   return (
     <section id="past-events" className="py-20 md:py-28 bg-card">
@@ -35,7 +46,7 @@ const PastEvents = () => {
         ) : (
           <>
             <div className="space-y-16">
-              {shownEvents.map((event) => {
+              {pastEvents.map((event) => {
                 const gallery = event.imageAssets ?? [];
                 return (
                   <motion.div
@@ -94,13 +105,14 @@ const PastEvents = () => {
                 );
               })}
             </div>
-            {hasMore && (
+            {hasNextPage && (
               <div className="text-center mt-10">
                 <button
-                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  className="px-8 py-3 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-primary-foreground transition-colors min-h-[48px]"
+                  onClick={() => { if (!isFetchingNextPage) fetchNextPage(); }}
+                  disabled={isFetchingNextPage}
+                  className="px-8 py-3 rounded-lg border border-primary text-primary font-semibold text-sm hover:bg-primary hover:text-primary-foreground transition-colors min-h-[48px] disabled:opacity-60"
                 >
-                  Load More Events
+                  {isFetchingNextPage ? "Loading…" : "Load More Events"}
                 </button>
               </div>
             )}
